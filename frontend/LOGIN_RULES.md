@@ -1,6 +1,6 @@
-# 🔑 Breath Care - 로그인 및 회원가입 인증 규칙 문서 (LOGIN_RULES)
+# 🔑 BPACE - 로그인 및 회원가입 인증 규칙 문서 (LOGIN_RULES)
 
-본 문서는 **Breath Care** 애플리케이션의 인증 체계, 로그인/회원가입 규칙, 유효성 검사 기준 및 예외 처리 정책을 정리한 문서입니다.
+본 문서는 **BPACE** 애플리케이션의 인증 체계, 로그인/회원가입 규칙, 유효성 검사 기준 및 예외 처리 정책을 정리한 문서입니다.
 
 ---
 
@@ -9,8 +9,7 @@
 | 항목 | 입력 규칙 | 비고 및 검증 예외 메세지 |
 | :--- | :--- | :--- |
 | **이름 (닉네임)** | 필수 입력 (공백 제외 1자 이상) | `'이름(닉네임)을 입력해 주세요.'` |
-| **아이디 (이메일)** | 표준 이메일 형식 (`@`
- 및 도메인 포함) | `'유효한 이메일 형식을 입력해 주세요.'` |
+| **아이디 (이메일)** | 표준 이메일 형식 (`@` 및 도메인 포함) | `'유효한 이메일 형식을 입력해 주세요.'` |
 | **비밀번호** | **최소 8자 이상 ~ 최대 64자 이하** | `'비밀번호는 8자 이상 64자 이하로 입력해 주세요.'` |
 | **비밀번호 확인** | 비밀번호 필드와 100% 일치 | `'비밀번호가 일치하지 않습니다.'` |
 
@@ -40,8 +39,8 @@
 
 ---
 
-* **최종 수정일**: 2026-08-20
+* **최종 수정일**: 2026-09-09
 * **관련 파일**:
-  * [`lib/screens/login_screen.dart`](file:///c:/Users/82103/Desktop/breath-care/frontend/lib/screens/login_screen.dart)
-  * [`lib/screens/signup_screen.dart`](file:///c:/Users/82103/Desktop/breath-care/frontend/lib/screens/signup_screen.dart)
-  * [`lib/services/auth_service.dart`](file:///c:/Users/82103/Desktop/breath-care/frontend/lib/services/auth_service.dart)
+  * [`lib/screens/login_screen.dart`](file:///c:/Users/82103/Desktop/bpace/frontend/lib/screens/login_screen.dart)
+  * [`lib/screens/signup_screen.dart`](file:///c:/Users/82103/Desktop/bpace/frontend/lib/screens/signup_screen.dart)
+  * [`lib/services/auth_service.dart`](file:///c:/Users/82103/Desktop/bpace/frontend/lib/services/auth_service.dart)

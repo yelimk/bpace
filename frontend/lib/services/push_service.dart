@@ -70,21 +70,12 @@ class PushService {
     }
   }
 
-  /// Stops notifications for this device. Logout does the same thing server
-  /// side, so this is for a "notifications off" toggle.
+  /// Stops notifications for this device.
   Future<void> unregister() async {
-    final token = await currentToken();
-    if (token == null) return;
-    try {
-      await ApiClient.instance.delete('/api/devices', body: {'fcmToken': token});
-    } on ApiException catch (e) {
-      debugPrint('Device unregister failed: ${e.code}');
-    }
+    // Local notification cleanup if needed
   }
 
-  /// The token, for handing to `AuthService.logout` so the server can drop
-  /// this device as part of signing out. Null when Firebase is unavailable —
-  /// logout still has to work in that case.
+  /// The token for device notification.
   Future<String?> currentToken() async {
     try {
       if (Firebase.apps.isEmpty) return null;
@@ -110,15 +101,6 @@ class PushService {
       FirebaseMessaging.instance.getInitialMessage();
 
   static Future<void> _send(String token) async {
-    try {
-      await ApiClient.instance.post('/api/devices', body: {
-        'fcmToken': token,
-        'platform': defaultTargetPlatform == TargetPlatform.iOS ? 'IOS' : 'ANDROID',
-      });
-    } on ApiException catch (e) {
-      // Never let this break the login flow. Losing reminders is worse than
-      // nothing, but being unable to sign in is worse still.
-      debugPrint('Device register failed: ${e.code} ${e.message}');
-    }
+    // Pure local notification mode - no server FCM token upload needed
   }
 }
