@@ -5,6 +5,8 @@
 > 💡 **핵심 가이드라인 & 운영 방침**:
 > 1. 💰 **100% 무료 인프라 준수 (Zero-Cost Infrastructure)**: 본 명세서에 수록된 모든 기술 스택, DB(Supabase/PostgreSQL/SQLite), AI API(Gemini 2.0 Flash Free Tier), 클라우드 호스팅(Render/Railway/Vercel) 및 로컬 알림은 **100% 비용 부담 없는 무료 티어(Free Tier)로 구축**합니다.
 > 2. 🎯 **해커톤 제출 최적화 & 상용 배포 확장성 (Hackathon Submission & Production Ready)**: 본 백엔드는 **우선적으로 해커톤 대회 제출에 맞춰 빠른 시연과 완벽한 검증이 가능한 상태로 구축**하되, **추후 정식 앱 스토어/플레이 스토어 상용 서비스 배포까지 즉시 가능한 수준의 높은 확장성과 완성도**로 설계합니다.
+> 3. 📜 **허용적 오픈소스 라이선스 준수 (Permissive License Compliance)**: 프로젝트에 사용되는 모든 라이브러리 및 패키지는 상업적/대회 이용 시 저작권 문제가 없는 **MIT / Apache 2.0 / BSD 등 허용적 라이선스만 사용**하며, 프로젝트 루트에 `LICENSE` (MIT License)를 명시합니다.
+> 4. 🔒 **철저한 보안 및 비밀키 유출 방지 (.gitignore Security Enforcement)**: API 키, `.env`, `google-services.json`, 서비스 계정 자격 증명, SSL 키, DB 접속 정보 등 모든 보안 파일은 `.gitignore`에 빠짐없이 등록하여 깃허브 원격 유출을 100% 차단합니다.
 
 ---
 

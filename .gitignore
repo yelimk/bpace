@@ -1,21 +1,50 @@
+# ==========================================
+# BPACE Security & Environment Ignored Files
+# ==========================================
+
+# Environment & Secret Keys
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+*.crt
+*.cer
+*.jks
+*.keystore
+key.properties
+local.properties
+**/android/local.properties
+
+# Google Cloud & Firebase Credentials
+**/google-services.json
+**/GoogleService-Info.plist
+*service-account*.json
+firebase-*.json
+gcp-*.json
+
+# Backend & Database Secret Files
+*.db
+*.sqlite
+*.sqlite3
+node_modules/
+dist/
+out/
+__pycache__/
+*.pyc
+venv/
+.venv/
+.vercel
+.render
+
 # OS Generated Files
 .DS_Store
 .DS_Store?
 Thumbs.db
 ehthumbs.db
 [Dd]esktop.ini
-
-# Environment and Secrets
-.env
-.env.*
-*.pem
-*.key
-*.p12
-*.jks
-*.keystore
-key.properties
-local.properties
-**/android/local.properties
 
 # IDE & Editor files
 .idea/
@@ -24,7 +53,7 @@ local.properties
 *.ipr
 *.iws
 
-# Flutter / Dart / Pub
+# Flutter / Dart Build & Dependency Artifacts
 **/doc/api/
 .dart_tool/
 .flutter-plugins
@@ -35,16 +64,16 @@ local.properties
 build/
 coverage/
 
-# iOS & Windows Platform Files
+# iOS & Windows Ephemeral Files
 **/ios/Pods/
 **/ios/.symlinks/
 **/ios/Flutter/Generated.xcconfig
 **/ios/Flutter/flutter_export_environment.sh
 **/ios/Flutter/ephemeral/
 windows/flutter/ephemeral/
-.vercel
 
-# Miscellaneous
+# Logs & Temporary Scratch Files
 *.class
 *.log
 .agents/
+scratch/
