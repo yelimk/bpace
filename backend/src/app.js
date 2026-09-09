@@ -14,6 +14,8 @@ app.use(express.urlencoded({ extended: true }));
 // Routes Import
 const authRoutes = require('./routes/authRoutes');
 const measurementRoutes = require('./routes/measurementRoutes');
+const breathingLogRoutes = require('./routes/breathingLogRoutes');
+const statisticsRoutes = require('./routes/statisticsRoutes');
 
 // Health Check API
 app.get('/api/health', (req, res) => {
@@ -28,6 +30,8 @@ app.get('/api/health', (req, res) => {
 // API Routes Mounting
 app.use('/api/auth', authRoutes);
 app.use('/api/measurements', measurementRoutes);
+app.use('/api/breathing-logs', breathingLogRoutes);
+app.use('/api/statistics', statisticsRoutes);
 
 // 404 Route Handler
 app.use((req, res) => {

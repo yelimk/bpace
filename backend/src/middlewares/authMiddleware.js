@@ -51,7 +51,48 @@ async function authenticateToken(req, res, next) {
   }
 }
 
+/**
+ * 선택적 JWT 인증 미들웨어 (게스트 및 회원 모두 지원)
+ * 토큰이 있으면 유저 검증, 없으면 req.user = null 로 진행
+ */
+async function optionalAuthMiddleware(req, res, next) {
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+
+    if (!token) {
+      req.user = null;
+      return next();
+    }
+
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.userId }
+      });
+      if (user) {
+        req.user = {
+          id: user.id,
+          email: user.email,
+          nickname: user.name,
+          authProvider: user.authProvider,
+          createdAt: user.createdAt
+        };
+      } else {
+        req.user = null;
+      }
+    } catch (_) {
+      req.user = null;
+    }
+    next();
+  } catch (error) {
+    req.user = null;
+    next();
+  }
+}
+
 module.exports = {
   authenticateToken,
+  optionalAuthMiddleware,
   JWT_SECRET
 };

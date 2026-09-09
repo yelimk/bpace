@@ -1616,7 +1616,7 @@ class _LogScreenState extends State<LogScreen> {
         {'day': '목', 'val': 24, 'height': 72.0, 'color': const Color(0xFF474A52), 'textColor': const Color(0xFF80848E)},
         {'day': '금', 'val': 19, 'height': 55.0, 'color': const Color(0xFFF9F6AF), 'textColor': const Color(0xFFF9F6AF), 'hasDot': true},
         {'day': '토', 'val': 29, 'height': 105.0, 'color': const Color(0xFF555861), 'textColor': const Color(0xFF80848E)},
-        {'day': '일', 'val': null, 'height': 8.0, 'color': const Color(0xFF38393F), 'textColor': const Color(0xFF6E727C)},
+        {'day': '일', 'val': 21, 'height': 62.0, 'color': const Color(0xFF474A52), 'textColor': const Color(0xFF80848E)},
       ];
     } else {
       // Dynamic calculation based on _weekdayHrvMap
@@ -2203,49 +2203,7 @@ class _HrLineChartPainter extends CustomPainter {
         Paint()..color = AppColors.white,
       );
 
-      const badgeWidth = 36.0;
-      const badgeHeight = 22.0;
-      final badgeOffset = Offset(
-        (lastPoint.dx - badgeWidth / 2).clamp(startX, w - badgeWidth),
-        (lastPoint.dy - badgeHeight - 8).clamp(0.0, h - 24),
-      );
 
-      final badgeRRect = RRect.fromRectAndRadius(
-        Rect.fromLTWH(
-          badgeOffset.dx,
-          badgeOffset.dy,
-          badgeWidth,
-          badgeHeight,
-        ),
-        const Radius.circular(8),
-      );
-
-      canvas.drawRRect(
-        badgeRRect,
-        Paint()..color = AppColors.white,
-      );
-
-      final badgeTextSpan = TextSpan(
-        text: '$latestValue',
-        style: const TextStyle(
-          fontFamily: AppFonts.pretendard,
-          fontSize: 12,
-          fontWeight: FontWeight.w400,
-          color: AppColors.darkBg,
-        ),
-      );
-      final badgePainter = TextPainter(
-        text: badgeTextSpan,
-        textDirection: TextDirection.ltr,
-      );
-      badgePainter.layout();
-      badgePainter.paint(
-        canvas,
-        Offset(
-          badgeOffset.dx + (badgeWidth - badgePainter.width) / 2,
-          badgeOffset.dy + (badgeHeight - badgePainter.height) / 2,
-        ),
-      );
     }
   }
 

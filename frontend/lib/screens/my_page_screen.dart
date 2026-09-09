@@ -7,6 +7,8 @@ import '../services/api_client.dart';
 import '../services/auth_service.dart';
 import '../services/push_service.dart';
 import 'login_screen.dart';
+import 'log_screen.dart';
+import 'ritual_history_screen.dart';
 
 class MyPageScreen extends StatefulWidget {
   const MyPageScreen({super.key});
@@ -173,111 +175,120 @@ class _MyPageScreenState extends State<MyPageScreen> {
               const SizedBox(height: 28),
 
               // Card 1: 이번 주 Ritual (Light Mint Wide Card with weekly_ritual_card.png graphic)
-              Container(
-                width: double.infinity,
-                height: 125,
-                decoration: BoxDecoration(
-                  color: AppColors.lightMint,
-                  borderRadius: BorderRadius.circular(22),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(22),
-                  child: Stack(
-                    children: [
-                      // Right Side Image / Graphic (weekly_ritual_card.png matching screenshot)
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        bottom: 0,
-                        child: Image.asset(
-                          'assets/images/weekly_ritual_card.png',
-                          fit: BoxFit.contain,
-                          alignment: Alignment.centerRight,
-                          errorBuilder: (context, error, stackTrace) => Opacity(
-                            opacity: 0.3,
-                            child: Row(
-                              children: [
-                                Transform.rotate(
-                                  angle: 0.3,
-                                  child: Container(
-                                    width: 44,
-                                    height: 44,
-                                    decoration: BoxDecoration(
-                                      color: Colors.black26,
-                                      borderRadius: BorderRadius.circular(10),
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const RitualHistoryScreen(),
+                    ),
+                  );
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 125,
+                  decoration: BoxDecoration(
+                    color: AppColors.lightMint,
+                    borderRadius: BorderRadius.circular(22),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(22),
+                    child: Stack(
+                      children: [
+                        // Right Side Image / Graphic (weekly_ritual_card.png matching screenshot)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          bottom: 0,
+                          child: Image.asset(
+                            'assets/images/weekly_ritual_card.png',
+                            fit: BoxFit.contain,
+                            alignment: Alignment.centerRight,
+                            errorBuilder: (context, error, stackTrace) => Opacity(
+                              opacity: 0.3,
+                              child: Row(
+                                children: [
+                                  Transform.rotate(
+                                    angle: 0.3,
+                                    child: Container(
+                                      width: 44,
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                        color: Colors.black26,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                Transform.rotate(
-                                  angle: -0.4,
-                                  child: Container(
-                                    width: 60,
-                                    height: 60,
-                                    decoration: BoxDecoration(
-                                      color: Colors.black26,
-                                      borderRadius: BorderRadius.circular(14),
+                                  const SizedBox(width: 8),
+                                  Transform.rotate(
+                                    angle: -0.4,
+                                    child: Container(
+                                      width: 60,
+                                      height: 60,
+                                      decoration: BoxDecoration(
+                                        color: Colors.black26,
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
                                     ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+
+                      // Content Overlay
+                      Padding(
+                        padding: const EdgeInsets.all(18.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '이번 주 Ritual',
+                                  style: TextStyle(
+                                    fontFamily: AppFonts.pretendard,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    color: AppColors.darkBg,
+                                  ),
+                                ),
+                                _NorthEastButton(),
+                              ],
+                            ),
+                            const Spacer(),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.baseline,
+                              textBaseline: TextBaseline.alphabetic,
+                              children: [
+                                const Text(
+                                  '4',
+                                  style: TextStyle(
+                                    fontFamily: AppFonts.pretendard,
+                                    fontSize: 38,
+                                    fontWeight: FontWeight.w400,
+                                    color: AppColors.darkBg,
+                                    height: 1.0,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  '회',
+                                  style: TextStyle(
+                                    fontFamily: AppFonts.pretendard,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w400,
+                                    color: AppColors.darkBg.withAlpha(200),
                                   ),
                                 ),
                               ],
                             ),
-                          ),
+                          ],
                         ),
                       ),
-
-                    // Content Overlay
-                    Padding(
-                      padding: const EdgeInsets.all(18.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '이번 주 Ritual',
-                                style: TextStyle(
-                                  fontFamily: AppFonts.pretendard,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  color: AppColors.darkBg,
-                                ),
-                              ),
-                              _NorthEastButton(),
-                            ],
-                          ),
-                          const Spacer(),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.baseline,
-                            textBaseline: TextBaseline.alphabetic,
-                            children: [
-                              const Text(
-                                '5',
-                                style: TextStyle(
-                                  fontFamily: AppFonts.pretendard,
-                                  fontSize: 38,
-                                  fontWeight: FontWeight.w400,
-                                  color: AppColors.darkBg,
-                                  height: 1.0,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                '회',
-                                style: TextStyle(
-                                  fontFamily: AppFonts.pretendard,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w400,
-                                  color: AppColors.darkBg.withAlpha(200),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
