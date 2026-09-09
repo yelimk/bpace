@@ -1,0 +1,32 @@
+{
+  "name": "bpace-backend",
+  "version": "1.0.0",
+  "description": "BPACE Wellness Platform Backend Service",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "db:migrate": "prisma migrate dev --name init",
+    "db:studio": "prisma studio"
+  },
+  "keywords": [
+    "bpace",
+    "ppg",
+    "wellness",
+    "breathing",
+    "gemini",
+    "express"
+  ],
+  "author": "yelimk",
+  "license": "MIT",
+  "dependencies": {
+    "@prisma/client": "^6.4.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9",
+    "prisma": "^6.4.1"
+  }
+}
