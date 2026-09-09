@@ -9,6 +9,9 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Routes Import
+const measurementRoutes = require('./routes/measurementRoutes');
+
 // Health Check API
 app.get('/api/health', (req, res) => {
   res.status(200).json({
@@ -18,6 +21,9 @@ app.get('/api/health', (req, res) => {
     env: process.env.NODE_ENV || 'development'
   });
 });
+
+// API Routes Mounting
+app.use('/api/measurements', measurementRoutes);
 
 // 404 Route Handler
 app.use((req, res) => {
