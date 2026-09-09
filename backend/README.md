@@ -2,6 +2,10 @@
 
 본 문서는 BPACE 백엔드 구축 및 대회 제출/배포 마스터 가이드와 세부 기술 명세서(회원 등급 체계, PPG 계산 수식, 호흡 추천 시스템, Gemini AI 분석 구조)를 **단 하나의 문서로 통합**한 종합 명세서입니다.
 
+> 💡 **핵심 가이드라인 & 운영 방침**:
+> 1. 💰 **100% 무료 인프라 준수 (Zero-Cost Infrastructure)**: 본 명세서에 수록된 모든 기술 스택, DB(Supabase/PostgreSQL/SQLite), AI API(Gemini 2.0 Flash Free Tier), 클라우드 호스팅(Render/Railway/Vercel) 및 로컬 알림은 **100% 비용 부담 없는 무료 티어(Free Tier)로 구축**합니다.
+> 2. 🎯 **해커톤 제출 최적화 & 상용 배포 확장성 (Hackathon Submission & Production Ready)**: 본 백엔드는 **우선적으로 해커톤 대회 제출에 맞춰 빠른 시연과 완벽한 검증이 가능한 상태로 구축**하되, **추후 정식 앱 스토어/플레이 스토어 상용 서비스 배포까지 즉시 가능한 수준의 높은 확장성과 완성도**로 설계합니다.
+
 ---
 
 ## 📌 Part 1. 핵심 구축 목표 및 세부 기능
