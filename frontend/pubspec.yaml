@@ -1,0 +1,53 @@
+name: bpace
+description: "BPACE Flutter Application"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  shared_preferences: ^2.5.5
+  google_fonts: ^6.2.1
+  camera: 0.10.5+9
+  permission_handler: 11.3.1
+  http: ^1.2.0
+  audioplayers: ^6.0.0
+  firebase_core: ^3.8.0
+  firebase_messaging: ^15.1.5
+  google_sign_in: ^6.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/fonts/
+    - assets/images/
+    - assets/audio/
+
+  fonts:
+    - family: Pretendard
+      fonts:
+        - asset: assets/fonts/Pretendard-Regular.ttf
+        - asset: assets/fonts/Pretendard-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Pretendard-Bold.ttf
+          weight: 700
+
+    - family: GmarketSans
+      fonts:
+        - asset: assets/fonts/GmarketSansLight.woff
+          weight: 300
+        - asset: assets/fonts/GmarketSansMedium.woff
+          weight: 500
+        - asset: assets/fonts/GmarketSansBold.woff
+          weight: 700
