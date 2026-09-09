@@ -6,7 +6,7 @@
 > 1. 💰 **100% 무료 인프라 준수 (Zero-Cost Infrastructure)**: 본 명세서에 수록된 모든 기술 스택, DB(Supabase/PostgreSQL/SQLite), AI API(Gemini 2.0 Flash Free Tier), 클라우드 호스팅(Render/Railway/Vercel) 및 로컬 알림은 **100% 비용 부담 없는 무료 티어(Free Tier)로 구축**합니다.
 > 2. 🎯 **최우선 해커톤 제출 완벽 시연 & 상용 배포 비전 (Hackathon First & Production Vision)**: **최우선 목표는 해커톤 대회 심사위원 대상 완벽한 시연 및 검증(100% 무료 인프라, Suno AI 생성 음원 시연)**에 100% 맞추어 구축합니다. 정식 상용 출시(스토어 배포)는 추후 상용 음원 라이선스 획득 및 프리미엄 구독 모델로 바로 연결되는 **'차기 상용화 로드맵 비전'**으로 설정합니다.
 > 3. 📜 **허용적 오픈소스 라이선스 준수 (Permissive License Compliance)**: 프로젝트에 사용되는 모든 라이브러리 및 패키지는 상업적/대회 이용 시 저작권 문제가 없는 **MIT / Apache 2.0 / BSD 등 허용적 라이선스만 사용**하며, 프로젝트 루트에 `LICENSE` (MIT License)를 명시합니다.
-> 🔬 **카메라 PPG 학술 근거 & 상세 알고리즘 문서**: [PPG_SCIENTIFIC_EVIDENCE_AND_ALGORITHM.md](file:///c:/Users/82103/Desktop/bpace/PPG_SCIENTIFIC_EVIDENCE_AND_ALGORITHM.md) (IEEE/Nature/JMIR 논문 근거, 심박수/HRV 수식, 컨디션 점수 환산, 8종 호흡 추천)
+> 🔬 **카메라 PPG 학술 근거 & 상세 알고리즘 문서**: [backend/PPG_SCIENTIFIC_EVIDENCE_AND_ALGORITHM.md](file:///c:/Users/82103/Desktop/bpace/backend/PPG_SCIENTIFIC_EVIDENCE_AND_ALGORITHM.md) (IEEE/Nature/JMIR 논문 근거, 심박수/HRV 수식, 50~96점 컨디션 점수 환산, 5대 호흡 추천)
 
 ---
 
