@@ -98,8 +98,10 @@ graph LR
      $$\text{SDNN} = \sqrt{\frac{1}{N}\sum_{i=1}^{N}(RR_i - \overline{RR})^2}$$
    * **RMSSD** (부교감 신경 활성도 / 스트레스 완화 지표): 연속 R-R 차이의 제곱평균제곱근
      $$\text{RMSSD} = \sqrt{\frac{1}{N-1}\sum_{i=1}^{N-1}(RR_{i+1} - RR_i)^2}$$
-6. **컨디션 점수 & 응답 JSON**:
-   * 안정 심박수(60~80 BPM) 및 RMSSD 기준으로 `0~100점` 환산 후 아래 응답 반환:
+6. **의학적 가중치 융합 컨디션 점수 환산**:
+   * 심박 동적 안정성($S_{\text{BPM}}$)과 자율신경 부교감 이완도($S_{\text{HRV}}$)를 `4 : 6` 비율로 융합 반영하여 `0~100점` 환산:
+     $$\text{Condition Score} = \text{Round}\Big( 0.4 \times S_{\text{BPM}} + 0.6 \times S_{\text{HRV}} \Big)$$
+   * 응답 반환 예시:
    ```json
    {
      "bpm": 72,
