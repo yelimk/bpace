@@ -16,6 +16,7 @@ const authRoutes = require('./routes/authRoutes');
 const measurementRoutes = require('./routes/measurementRoutes');
 const breathingLogRoutes = require('./routes/breathingLogRoutes');
 const statisticsRoutes = require('./routes/statisticsRoutes');
+const scheduleRoutes = require('./routes/scheduleRoutes');
 
 // Health Check API
 app.get('/api/health', (req, res) => {
@@ -32,6 +33,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/measurements', measurementRoutes);
 app.use('/api/breathing-logs', breathingLogRoutes);
 app.use('/api/statistics', statisticsRoutes);
+app.use('/api/schedules', scheduleRoutes);
 
 // 404 Route Handler
 app.use((req, res) => {
