@@ -5,11 +5,17 @@ import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../utils/responsive.dart';
 import 'breathing_exercise_screen.dart';
+import 'breathing_completion_screen.dart';
 
 class RitualRecordItem {
   final String title;
   final String timestamp;
   final String bgImagePath;
+  final String durationString;
+  final int cycleCount;
+  final String? aiHeadline;
+  final String? aiQuote;
+  final String? aiFeedbackText;
   final double? inhaleSec;
   final double? inhale2Sec;
   final double? holdSec;
@@ -20,6 +26,11 @@ class RitualRecordItem {
     required this.title,
     required this.timestamp,
     required this.bgImagePath,
+    this.durationString = '05:04',
+    this.cycleCount = 1,
+    this.aiHeadline,
+    this.aiQuote,
+    this.aiFeedbackText,
     this.inhaleSec,
     this.inhale2Sec,
     this.holdSec,
@@ -63,6 +74,11 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
       title: '4-7-8 호흡',
       timestamp: '2026.09.07 오후 8:30',
       bgImagePath: 'assets/images/bg_breath_478.png',
+      durationString: '05:04',
+      cycleCount: 16,
+      aiHeadline: '4-7-8 호흡 세션을 완주했어요.',
+      aiQuote: '깊은 숨을 내쉴 때마다 마음에 쌓인 부담은 아득히 멀어집니다.',
+      aiFeedbackText: '4-7-8 호흡은 날숨을 길게 유지하여 부교감신경을 활성화하는 데 탁월한 리듬이에요. 하루 일과 후 복잡했던 머릿속을 차분하게 가라앉히고 깊은 휴식 상태로 전환하셨습니다.',
       inhaleSec: 4.0,
       holdSec: 7.0,
       exhaleSec: 8.0,
@@ -71,6 +87,11 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
       title: '생리학적 한숨',
       timestamp: '2026.09.07 오후 12:30',
       bgImagePath: 'assets/images/bg_breath_sigh.png',
+      durationString: '03:15',
+      cycleCount: 20,
+      aiHeadline: '생리학적 한숨으로 긴장을 완화했어요.',
+      aiQuote: '두 번의 짧은 들이쉼과 긴 내쉼으로, 마음에 신선한 여유가 차오릅니다.',
+      aiFeedbackText: '생리학적 한숨은 폐포를 활짝 열어 뇌에 즉각적인 산소를 공급하고 급격한 자율신경계 긴장을 수 초 내에 가라앉히는 가장 빠른 리셋 호흡입니다.',
       inhaleSec: 2.0,
       inhale2Sec: 1.5,
       exhaleSec: 4.5,
@@ -79,6 +100,11 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
       title: '4-4-4-4 호흡',
       timestamp: '2026.09.07 오전 11:00',
       bgImagePath: 'assets/images/bg_breath_box_4444.png',
+      durationString: '04:00',
+      cycleCount: 15,
+      aiHeadline: '박스 호흡으로 흔들림 없는 평정을 찾았어요.',
+      aiQuote: '네 변이 균등한 상자처럼, 흐트러진 생각의 중심을 단단히 잡았습니다.',
+      aiFeedbackText: '들숨과 날숨, 그리고 멈춤의 길이가 같은 박스 호흡은 교감과 부교감 신경의 균형을 유지하여 감정 동요를 줄이고 맑은 집중 상태를 유지하도록 도와줍니다.',
       inhaleSec: 4.0,
       holdSec: 4.0,
       exhaleSec: 4.0,
@@ -88,6 +114,11 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
       title: '4-1-2-1 호흡',
       timestamp: '2026.09.07 오전 9:30',
       bgImagePath: 'assets/images/bg_breath_awakening.png',
+      durationString: '03:00',
+      cycleCount: 18,
+      aiHeadline: '활력을 깨우는 각성 리듬을 완주했어요.',
+      aiQuote: '산뜻한 숨결로 하루의 리듬을 활기차게 시작해 보세요.',
+      aiFeedbackText: '경쾌한 템포 속에서 심박과 호흡수를 가볍게 올려주어 나른한 피로감을 털어내고 활기찬 오전 집중력을 끌어올리는 좋은 활력 루틴입니다.',
       inhaleSec: 4.0,
       holdSec: 1.0,
       exhaleSec: 2.0,
@@ -146,6 +177,11 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
             title: decoded['title'] as String? ?? '4-7-8 호흡',
             timestamp: decoded['timestamp'] as String? ?? '',
             bgImagePath: decoded['bgImagePath'] as String? ?? 'assets/images/bg_breath_478.png',
+            durationString: decoded['durationString'] as String? ?? '05:04',
+            cycleCount: decoded['cycleCount'] as int? ?? 1,
+            aiHeadline: decoded['aiHeadline'] as String?,
+            aiQuote: decoded['aiQuote'] as String?,
+            aiFeedbackText: decoded['aiFeedbackText'] as String?,
           ),
         );
       } catch (_) {}
@@ -399,7 +435,7 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
   /// Individual Record Card Component
   Widget _buildRecordCard(RitualRecordItem item) {
     return GestureDetector(
-      onTap: () => _startBreathing(item),
+      onTap: () => _openFeedbackDetail(item),
       behavior: HitTestBehavior.opaque,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -470,9 +506,10 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
               ),
             ),
 
-            // Play Icon Button on the right
+            // Play Icon Button on the right (Re-starts breathing exercise)
             GestureDetector(
               onTap: () => _startBreathing(item),
+              behavior: HitTestBehavior.opaque,
               child: Container(
                 width: 38,
                 height: 38,
@@ -491,6 +528,23 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
         ),
       ),
     );
+  }
+
+  void _openFeedbackDetail(RitualRecordItem item) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => BreathingCompletionScreen(
+          title: item.title,
+          bgImagePath: item.bgImagePath,
+          durationString: item.durationString,
+          cycleCount: item.cycleCount,
+          initialHeadline: item.aiHeadline,
+          initialQuote: item.aiQuote,
+          initialFeedbackText: item.aiFeedbackText,
+          isAlreadySaved: true,
+        ),
+      ),
+    ).then((_) => _loadSavedRecords());
   }
 
   void _startBreathing(RitualRecordItem item) {

@@ -19,6 +19,10 @@ class BreathingCompletionScreen extends StatefulWidget {
   final int cycleCount;
   final String hrvChange;
   final String? targetScheduleId;
+  final String? initialHeadline;
+  final String? initialQuote;
+  final String? initialFeedbackText;
+  final bool isAlreadySaved;
 
   const BreathingCompletionScreen({
     super.key,
@@ -28,6 +32,10 @@ class BreathingCompletionScreen extends StatefulWidget {
     this.cycleCount = 1,
     this.hrvChange = '-8 bpm',
     this.targetScheduleId,
+    this.initialHeadline,
+    this.initialQuote,
+    this.initialFeedbackText,
+    this.isAlreadySaved = false,
   });
 
   @override
@@ -46,8 +54,20 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
   @override
   void initState() {
     super.initState();
+    _isSaved = widget.isAlreadySaved;
     _loadBookmarkStatus();
-    _fetchAiFeedback();
+
+    if (widget.initialQuote != null && widget.initialQuote!.isNotEmpty) {
+      _aiFeedback = BreathingFeedback(
+        headline: widget.initialHeadline ?? '',
+        summaryText: '${widget.durationString} 동안 ${widget.cycleCount}번의 호흡을 마쳤어요.',
+        feedbackText: widget.initialFeedbackText ?? '',
+        todaysQuote: widget.initialQuote ?? '',
+      );
+    } else {
+      _fetchAiFeedback();
+    }
+
     if (widget.targetScheduleId != null && widget.targetScheduleId!.isNotEmpty) {
       ScheduleStorageService.completeSchedule(widget.targetScheduleId);
     }
@@ -79,6 +99,7 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
           _aiErrorMessage = null;
           _isLoadingFeedback = false;
         });
+        _updateSavedRecordWithAi(feedback);
       }
     } catch (e) {
       debugPrint('[BreathingCompletionScreen] Gemini AI feedback fetch error: $e');
@@ -90,6 +111,32 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
         });
       }
     }
+  }
+
+  Future<void> _updateSavedRecordWithAi(BreathingFeedback feedback) async {
+    if (!widget.isAlreadySaved) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final historyList = prefs.getStringList('saved_ritual_history_v1') ?? [];
+      final updatedList = <String>[];
+      bool updated = false;
+
+      for (final raw in historyList) {
+        final decoded = jsonDecode(raw) as Map<String, dynamic>;
+        if (!updated && decoded['title'] == widget.title && (decoded['aiQuote'] == null || (decoded['aiQuote'] as String).isEmpty)) {
+          decoded['aiHeadline'] = feedback.headline;
+          decoded['aiQuote'] = feedback.todaysQuote;
+          decoded['aiFeedbackText'] = feedback.feedbackText;
+          updatedList.add(jsonEncode(decoded));
+          updated = true;
+        } else {
+          updatedList.add(raw);
+        }
+      }
+      if (updated) {
+        await prefs.setStringList('saved_ritual_history_v1', updatedList);
+      }
+    } catch (_) {}
   }
 
   String _getRoutineIdByTitle(String title) {
@@ -116,6 +163,11 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
   }
 
   Future<void> _onSaveRecord() async {
+    if (_isSaved && widget.isAlreadySaved) {
+      if (mounted) Navigator.of(context).pop();
+      return;
+    }
+
     final prefs = await SharedPreferences.getInstance();
 
     if (!_isSaved) {
@@ -147,7 +199,11 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
         'timestamp': timestampStr,
         'bgImagePath': widget.bgImagePath,
         'durationSeconds': durationSec,
+        'durationString': widget.durationString,
         'cycleCount': widget.cycleCount,
+        'aiHeadline': _aiFeedback?.headline ?? '',
+        'aiQuote': _aiFeedback?.todaysQuote ?? '',
+        'aiFeedbackText': _aiFeedback?.feedbackText ?? '',
       };
 
       // 2. Save record to SharedPreferences (Local Storage)
