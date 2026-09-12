@@ -78,7 +78,15 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
     } catch (e) {
       debugPrint('[BreathingCompletionScreen] Gemini AI feedback fetch error: $e');
       if (mounted) {
-        setState(() => _isLoadingFeedback = false);
+        setState(() {
+          _aiFeedback = BreathingFeedback(
+            headline: '${widget.title} 세션을 완주했어요.',
+            summaryText: '${widget.durationString} 동안 ${widget.cycleCount}번의 호흡을 마쳤어요.',
+            feedbackText: '${widget.title}은 긴장을 천천히 가라앉히는 데 효과적인 리듬으로 알려져 있어요. 이번 호흡으로 마음의 흐름을 한 번 더 따뜻하게 다듬은 셈이에요.',
+            todaysQuote: '깊은 숨을 내쉴 때마다 마음에 쌓인 부담은 아득히 멀어집니다.',
+          );
+          _isLoadingFeedback = false;
+        });
       }
     }
   }
