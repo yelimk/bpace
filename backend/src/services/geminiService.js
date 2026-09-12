@@ -20,10 +20,12 @@ async function generateAiContent(promptText) {
     throw error;
   }
 
-  // 최신 무료 지원 Gemini Flash 모델 후보 순서
+  // 최신 무료 지원 Gemini Flash 모델 후보 순서 (Google AI Studio Free Tier $0)
   const modelCandidates = [
-    'gemini-flash-latest',
-    'gemini-3.6-flash'
+    'gemini-3.6-flash',
+    'gemini-3-flash-preview',
+    'gemini-3.1-flash-lite',
+    'gemini-flash-latest'
   ];
 
   let lastError = null;
