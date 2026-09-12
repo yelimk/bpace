@@ -29,7 +29,7 @@ class Measurement {
     this.conditionScore,
   });
 
-  final int id;
+  final String id;
 
   /// Beats per minute.
   final double? hr;
@@ -46,11 +46,13 @@ class Measurement {
   final DateTime measuredAt;
 
   factory Measurement.fromJson(Map<String, dynamic> json) => Measurement(
-        id: json['id'] as int,
+        id: json['id']?.toString() ?? '0',
         hr: (json['hr'] as num?)?.toDouble(),
         hrv: (json['hrv'] as num?)?.toDouble(),
         conditionScore: (json['conditionScore'] as num?)?.toDouble(),
         quality: MeasurementQuality.parse(json['quality'] as String?),
-        measuredAt: DateTime.parse(json['measuredAt'] as String).toLocal(),
+        measuredAt: json['measuredAt'] != null
+            ? DateTime.parse(json['measuredAt'] as String).toLocal()
+            : DateTime.now(),
       );
 }
