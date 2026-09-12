@@ -52,9 +52,21 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
   Future<void> _fetchAiFeedback() async {
     if (mounted) setState(() => _isLoadingFeedback = true);
     try {
+      int durationSec = 300;
+      if (widget.durationString.contains(':')) {
+        final parts = widget.durationString.split(':');
+        if (parts.length == 2) {
+          final m = int.tryParse(parts[0]) ?? 0;
+          final s = int.tryParse(parts[1]) ?? 0;
+          durationSec = m * 60 + s;
+        }
+      } else {
+        durationSec = int.tryParse(widget.durationString) ?? 300;
+      }
+
       final feedback = await ReportService.instance.generateFeedback(
         routineName: widget.title,
-        durationSeconds: 304,
+        durationSeconds: durationSec,
         cycleCount: widget.cycleCount,
       );
       if (mounted) {
@@ -572,15 +584,45 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
     );
   }
 
-  /// 5. AI Analysis Container Card matching 1st screenshot
+  /// 5. AI Analysis Container Card (Gemini AI 피드백 실시간 연동)
   Widget _buildAiAnalysisCard() {
-    final subheader = _aiFeedback?.todaysQuote.isNotEmpty == true
-        ? '"${_aiFeedback!.todaysQuote}"'
-        : '심박수가 높아지는 순간, 리추얼이 도움이 될 수 있어요';
+    if (_isLoadingFeedback || _aiFeedback == null) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+        decoration: BoxDecoration(
+          color: const Color(0xFF28292B),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Column(
+          children: [
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: AppColors.lightMint,
+              ),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Gemini AI가 이번 호흡 리추얼 결과 분석 중...',
+              style: TextStyle(
+                fontFamily: AppFonts.pretendard,
+                fontSize: 13.5,
+                color: Color(0xFFACAEB3),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
-    final bodyAnalysis = _aiFeedback?.feedbackText.isNotEmpty == true
-        ? _aiFeedback!.feedbackText
-        : '${widget.title}은 긴장을 천천히 가라앉히는 데 효과적인 리듬으로 알려져 있어요. 시작 전 컨디션이 78점으로 이미 안정적인 편이었는데, 이번 Ritual로 그 흐름을 한 번 더 다듬은 셈이에요.';
+    final subheader = _aiFeedback!.todaysQuote.isNotEmpty
+        ? '"${_aiFeedback!.todaysQuote}"'
+        : (_aiFeedback!.headline.isNotEmpty ? '"${_aiFeedback!.headline}"' : '');
+
+    final bodyAnalysis = _aiFeedback!.feedbackText;
 
     return Container(
       width: double.infinity,
@@ -592,34 +634,20 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  subheader,
-                  style: const TextStyle(
-                    fontFamily: AppFonts.pretendard,
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.white,
-                  ),
-                ),
+          if (subheader.isNotEmpty) ...[
+            Text(
+              subheader,
+              style: const TextStyle(
+                fontFamily: AppFonts.pretendard,
+                fontSize: 14.5,
+                fontWeight: FontWeight.w400,
+                color: AppColors.white,
               ),
-              if (_isLoadingFeedback)
-                const SizedBox(
-                  width: 14,
-                  height: 14,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: AppColors.lightMint,
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 18),
+            ),
+            const SizedBox(height: 18),
+          ],
 
-          // Green Stat Line: 5분 4초 동안 16번의 호흡을 마쳤어요. (동안 포함 민트색, 볼드 제거)
+          // Green Stat Line: X분 Y초 동안 Z번의 호흡을 마쳤어요.
           RichText(
             text: TextSpan(
               style: const TextStyle(
@@ -644,7 +672,7 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
           ),
           const SizedBox(height: 14),
 
-          // Body Analysis Text matching 1st screenshot (밑줄 제거, 단일 톤)
+          // Body Analysis Text
           Text(
             bodyAnalysis,
             style: const TextStyle(

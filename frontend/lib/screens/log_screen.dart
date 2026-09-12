@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -33,6 +34,7 @@ class _LogScreenState extends State<LogScreen> {
 
   // Recorded HR History for dynamic HR Analysis
   List<int> _recordedHrHistory = [];
+  Map<int, List<int>> _weekdayHrMap = {};
 
   // Recorded HRV History: Map<int, List<int>> mapping weekday (1=Mon..7=Sun) to list of HRV values (ms)
   Map<int, List<int>> _weekdayHrvMap = {};
@@ -121,15 +123,59 @@ class _LogScreenState extends State<LogScreen> {
 
   Future<void> _fetchAiReport() async {
     if (_isLoadingAiReport) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    
+    // 1. 초기 더미 상태 (측정 기록이 아예 없는 경우): AI 호출을 하지 않고 더미 멘트 표시
+    final hasMeasured = prefs.getStringList('hr_history_v2')?.isNotEmpty == true ||
+        prefs.getStringList('hr_history')?.isNotEmpty == true;
+
+    if (!hasMeasured) {
+      if (mounted) setState(() => _aiReport = null);
+      return;
+    }
+
+    final avgBpm = int.tryParse(_avgHrStr) ?? 82;
+    final maxBpm = int.tryParse(_maxHrStr) ?? 94;
+    final minBpm = int.tryParse(_minHrStr) ?? 68;
+    final hrvSdnnMs = int.tryParse(_avgHrvStr) ?? 22;
+    final conditionScore = _weeklyAvgConditionScore;
+
+    final currentSig = '$avgBpm:$maxBpm:$minBpm:$hrvSdnnMs:$conditionScore';
+    final cachedSig = prefs.getString('cached_ai_report_sig');
+    final cachedJson = prefs.getString('cached_ai_report_json');
+
+    // 2. 상단 데이터가 이전과 동일한 경우: 기존에 생성된 AI 리포트 재사용 (Gemini API 중복 호출 0건)
+    if (cachedSig == currentSig && cachedJson != null && cachedJson.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(cachedJson) as Map<String, dynamic>;
+        final cachedReport = WeeklyReport.fromJson(decoded);
+        if (mounted) {
+          setState(() {
+            _aiReport = cachedReport;
+          });
+        }
+        return;
+      } catch (e) {
+        debugPrint('[LogScreen] Cached AI report parse error: $e');
+      }
+    }
+
+    // 3. 실제 신규 측정으로 상단 수치가 새로 바뀐 경우만: Gemini AI 신규 연산 호출!
     setState(() => _isLoadingAiReport = true);
     try {
       final report = await ReportService.instance.generate(
-        avgBpm: int.tryParse(_avgHrStr) ?? 82,
-        maxBpm: int.tryParse(_maxHrStr) ?? 94,
-        minBpm: int.tryParse(_minHrStr) ?? 68,
-        hrvSdnnMs: int.tryParse(_avgHrvStr) ?? 22,
-        conditionScore: _weeklyAvgConditionScore,
+        avgBpm: avgBpm,
+        maxBpm: maxBpm,
+        minBpm: minBpm,
+        hrvSdnnMs: hrvSdnnMs,
+        conditionScore: conditionScore,
       );
+
+      // 신규 리포트 및 시그니처 로컬 저장
+      await prefs.setString('cached_ai_report_sig', currentSig);
+      await prefs.setString('cached_ai_report_json', jsonEncode(report.toJson()));
+
       if (mounted) {
         setState(() {
           _aiReport = report;
@@ -209,6 +255,29 @@ class _LogScreenState extends State<LogScreen> {
       if (mounted) {
         setState(() {
           _recordedHrHistory = loadedHr;
+        });
+      }
+    }
+
+    final hrListV2 = prefs.getStringList('hr_history_v2');
+    if (hrListV2 != null && hrListV2.isNotEmpty) {
+      final Map<int, List<int>> map = {};
+      final List<int> allVals = [];
+      for (final entry in hrListV2) {
+        final parts = entry.split(':');
+        if (parts.length == 2) {
+          final w = int.tryParse(parts[0]);
+          final v = int.tryParse(parts[1]);
+          if (w != null && v != null) {
+            map.putIfAbsent(w, () => []).add(v);
+            allVals.add(v);
+          }
+        }
+      }
+      if (mounted) {
+        setState(() {
+          _weekdayHrMap = map;
+          if (allVals.isNotEmpty) _recordedHrHistory = allVals;
         });
       }
     }
@@ -1513,7 +1582,10 @@ class _LogScreenState extends State<LogScreen> {
                 height: 200,
                 width: double.infinity,
                 child: CustomPaint(
-                  painter: _HrLineChartPainter(hrList: _recordedHrHistory),
+                  painter: _HrLineChartPainter(
+                    weekdayHrMap: _weekdayHrMap,
+                    hrList: _recordedHrHistory,
+                  ),
                 ),
               ),
             ],
@@ -2077,11 +2149,15 @@ class _LogScreenState extends State<LogScreen> {
   }
 }
 
-/// CustomPainter for "이번 주 HR 추이" Line Chart
+/// CustomPainter for "이번 주 HR 추이" Line Chart (요일별 일일 평균 심박수 집계)
 class _HrLineChartPainter extends CustomPainter {
+  final Map<int, List<int>> weekdayHrMap;
   final List<int> hrList;
 
-  _HrLineChartPainter({this.hrList = const []});
+  _HrLineChartPainter({
+    this.weekdayHrMap = const {},
+    this.hrList = const [],
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -2144,14 +2220,26 @@ class _HrLineChartPainter extends CustomPainter {
       textPainter.paint(canvas, Offset(x - textPainter.width / 2, h - 14));
     }
 
-    // Dynamic HR Data Mapping
-    final List<int> activeData = hrList.isNotEmpty
-        ? hrList
-        : [50, 60, 65, 60, 72, 85, 74];
+    // Dynamic Daily Average HR Data Mapping for Mon..Sun (1..7)
+    final List<int> activeData = [];
+    final defaultBaseline = [72, 78, 82, 74, 80, 75, 72];
+    bool hasAnyData = false;
+    for (int w = 1; w <= 7; w++) {
+      final list = weekdayHrMap[w];
+      if (list != null && list.isNotEmpty) {
+        final avg = (list.reduce((a, b) => a + b) / list.length).round();
+        activeData.add(avg);
+        hasAnyData = true;
+      } else {
+        activeData.add(defaultBaseline[w - 1]);
+      }
+    }
+    if (!hasAnyData && hrList.isNotEmpty) {
+      activeData.clear();
+      activeData.addAll(hrList.take(7));
+    }
 
-    final double stepX = activeData.length > 1
-        ? chartW / (activeData.length - 1)
-        : chartW;
+    final double stepX = colW;
 
     final List<Offset> points = [];
     for (int i = 0; i < activeData.length; i++) {
@@ -2214,21 +2302,17 @@ class _HrLineChartPainter extends CustomPainter {
         );
       }
 
-      // Point Dot & Badge Tooltip on Last Highlight Point
+      // Point Dot on Last Highlight Point
       final lastPoint = points.last;
-      final latestValue = activeData.last;
-
       canvas.drawCircle(
         lastPoint,
         5.0,
         Paint()..color = AppColors.white,
       );
-
-
     }
   }
 
   @override
   bool shouldRepaint(covariant _HrLineChartPainter oldDelegate) =>
-      oldDelegate.hrList != hrList;
+      oldDelegate.weekdayHrMap != weekdayHrMap || oldDelegate.hrList != hrList;
 }

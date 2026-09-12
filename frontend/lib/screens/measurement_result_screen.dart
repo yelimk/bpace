@@ -93,8 +93,14 @@ class _MeasurementResultScreenState extends State<MeasurementResultScreen> {
     await prefs.setStringList('hr_history', hrHistory);
 
     final weekday = DateTime.now().weekday;
+    final hrVal = activeResult.bpm;
     final hrvVal = activeResult.hrvSdnnMs.round();
-    final newHrvHistory = List<String>.from(hrvHistory);
+
+    final hrHistoryV2 = prefs.getStringList('hr_history_v2') ?? [];
+    hrHistoryV2.add('$weekday:$hrVal');
+    await prefs.setStringList('hr_history_v2', hrHistoryV2);
+
+    final newHrvHistory = prefs.getStringList('hrv_history_v2') ?? [];
     newHrvHistory.add('$weekday:$hrvVal');
     await prefs.setStringList('hrv_history_v2', newHrvHistory);
 

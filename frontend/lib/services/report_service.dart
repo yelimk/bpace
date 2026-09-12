@@ -71,6 +71,21 @@ class WeeklyReport {
       todaysQuote: todaysQuote,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'headline': headline,
+        'summary': summary,
+        'insights': insights,
+        'advice': advice,
+        'disclaimer': disclaimer,
+        'createdAt': generatedAt.toIso8601String(),
+        'cached': cached,
+        'avgBpmAnalysis': avgBpmAnalysis,
+        'maxBpmAnalysis': maxBpmAnalysis,
+        'minBpmAnalysis': minBpmAnalysis,
+        'overallGuide': overallGuide,
+        'todaysQuote': todaysQuote,
+      };
 }
 
 /// Breathing session completion feedback response model
