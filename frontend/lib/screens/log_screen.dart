@@ -1348,6 +1348,15 @@ class _LogScreenState extends State<LogScreen> {
   }
 
   Widget _buildTodayRecordSection() {
+    final now = DateTime.now();
+    final todaySchedules = _schedules.where((s) {
+      final d = s['date'];
+      if (d is DateTime) {
+        return d.year == now.year && d.month == now.month && d.day == now.day;
+      }
+      return true;
+    }).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1362,12 +1371,12 @@ class _LogScreenState extends State<LogScreen> {
         ),
         const SizedBox(height: 14),
 
-        if (_schedules.isEmpty)
+        if (todaySchedules.isEmpty)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 24.0),
             child: Center(
               child: Text(
-                '오늘 예정된 일정이 없습니다.',
+                '오늘 등록된 일정이 없습니다.',
                 style: TextStyle(
                   fontFamily: AppFonts.pretendard,
                   fontSize: 14,
@@ -1377,7 +1386,7 @@ class _LogScreenState extends State<LogScreen> {
             ),
           )
         else
-          ..._schedules.map((schedule) {
+          ...todaySchedules.map((schedule) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12.0),
               child: _buildRecordScheduleCardItem(schedule),
