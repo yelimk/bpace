@@ -2262,37 +2262,36 @@ class _HrLineChartPainter extends CustomPainter {
     }
 
     // Dynamic Daily Average HR Data Mapping for Mon..Sun (1..7)
-    final List<int> activeData = [];
-    final defaultBaseline = [72, 78, 82, 74, 80, 75, 72];
-    bool hasAnyData = false;
+    final todayW = DateTime.now().weekday; // 1 = Mon .. 7 = Sun
+
+    final Map<int, int> dailyAvgs = {};
     for (int w = 1; w <= 7; w++) {
       final list = weekdayHrMap[w];
       if (list != null && list.isNotEmpty) {
         final avg = (list.reduce((a, b) => a + b) / list.length).round();
-        activeData.add(avg);
-        hasAnyData = true;
-      } else {
-        activeData.add(defaultBaseline[w - 1]);
+        dailyAvgs[w] = avg;
       }
     }
-    if (!hasAnyData && hrList.isNotEmpty) {
-      activeData.clear();
-      activeData.addAll(hrList.take(7));
+
+    // If no measurement exists in map yet, use latest recorded HR for today's weekday
+    if (dailyAvgs.isEmpty && hrList.isNotEmpty) {
+      dailyAvgs[todayW] = hrList.last;
     }
 
-    final double stepX = colW;
-
-    final List<Offset> points = [];
-    for (int i = 0; i < activeData.length; i++) {
-      final val = activeData[i];
-      // Normalize val between 20 and 120 (0.0 to 1.0)
+    final List<MapEntry<int, Offset>> pointEntries = [];
+    dailyAvgs.forEach((wIndex, val) {
       final norm = ((val - 20) / (120 - 20)).clamp(0.0, 1.0);
       final y = (h - 24) - norm * (h - 24 - 15);
-      final x = startX + i * stepX;
-      points.add(Offset(x, y));
-    }
+      final x = startX + (wIndex - 1) * colW;
+      pointEntries.add(MapEntry(wIndex, Offset(x, y)));
+    });
 
-    if (points.isNotEmpty) {
+    // Sort by day index (Mon..Sun)
+    pointEntries.sort((a, b) => a.key.compareTo(b.key));
+
+    if (pointEntries.isNotEmpty) {
+      final points = pointEntries.map((e) => e.value).toList();
+
       final path = Path();
       path.moveTo(points.first.dx, points.first.dy);
 
