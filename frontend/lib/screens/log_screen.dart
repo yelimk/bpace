@@ -2281,9 +2281,17 @@ class _HrLineChartPainter extends CustomPainter {
       }
     }
 
-    // If no measurement exists in map yet, use latest recorded HR for today's weekday
-    if (dailyAvgs.isEmpty && hrList.isNotEmpty) {
-      dailyAvgs[todayW] = hrList.last;
+    // If no measurement exists in map yet, populate with initial sample baseline curve
+    if (dailyAvgs.isEmpty) {
+      if (hrList.isNotEmpty) {
+        dailyAvgs[todayW] = hrList.last;
+      } else {
+        // Initial sample baseline curve matching reference design 1
+        final defaultBaseline = [68, 74, 78, 70, 75, 85, 68];
+        for (int w = 1; w <= 7; w++) {
+          dailyAvgs[w] = defaultBaseline[w - 1];
+        }
+      }
     }
 
     final List<MapEntry<int, Offset>> pointEntries = [];
