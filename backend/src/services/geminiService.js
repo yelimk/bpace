@@ -23,8 +23,7 @@ async function generateAiContent(promptText) {
   // 최신 무료 지원 Gemini Flash 모델 후보 순서
   const modelCandidates = [
     'gemini-flash-latest',
-    'gemini-3.6-flash',
-    'gemini-3.5-flash'
+    'gemini-3.6-flash'
   ];
 
   let lastError = null;

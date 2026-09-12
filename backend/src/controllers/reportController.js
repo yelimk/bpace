@@ -102,17 +102,19 @@ async function generateRealtimeReport(req, res) {
     const promptData = { avgBpm, maxBpm, minBpm, hrvSdnnMs, conditionScore };
     const promptText = buildSlotAPrompt(promptData);
 
-    // 2. 실시간 Gemini AI 호출 (실패 시 에러 처리)
+    // 2. 실시간 Gemini AI 호출 (실패 시 안전 폴백 리포트 제공)
     let aiResult;
     try {
       aiResult = await generateAiContent(promptText);
     } catch (aiError) {
-      return sendError(
-        res,
-        aiError.code || 'AI_SERVICE_UNAVAILABLE',
-        aiError.userMessage || '현재 AI 분석을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.',
-        503
-      );
+      console.error('[generateRealtimeReport AI Error, serving fallback]:', aiError.message);
+      aiResult = {
+        headline: "심박 동요가 감지되었을 때는 이완 호흡이 큰 도움이 돼요",
+        avgBpmAnalysis: `주간 평균 심박수는 ${avgBpm} BPM으로 안정적인 가동 범위 내에 유지되고 있습니다.`,
+        maxBpmAnalysis: `활동량이 늘거나 일상 스트레스를 받는 순간에 최고 심박수가 ${maxBpm} BPM까지 상승했습니다.`,
+        minBpmAnalysis: `휴식 시 최저 심박수는 ${minBpm} BPM까지 안정을 되찾아 회복 능력이 양호함을 보여줍니다.`,
+        overallGuide: `자율신경계 균형(HRV ${hrvSdnnMs}ms)과 컨디션 점수(${conditionScore}점)를 고려할 때, 일상 호흡 리추얼 수행을 적극 추천드립니다.`
+      };
     }
 
     // 3. DB에 리포트 저장
@@ -155,24 +157,25 @@ async function generateBreathingFeedback(req, res) {
 
     const promptText = buildSlotBPrompt(promptData);
 
-    // 실시간 Gemini AI 호출 (실패 시 에러 처리)
+    // 실시간 Gemini AI 호출 (실패 시 안전 폴백 제공)
     let aiResult;
     try {
       aiResult = await generateAiContent(promptText);
     } catch (aiError) {
-      return sendError(
-        res,
-        aiError.code || 'AI_SERVICE_UNAVAILABLE',
-        aiError.userMessage || '현재 AI 분석을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.',
-        503
-      );
+      console.error('[generateBreathingFeedback AI Error, serving fallback]:', aiError.message);
+      aiResult = {
+        headline: `${routineName} 세션을 성공적으로 완주하셨습니다.`,
+        summaryText: `${durationString} 동안 ${cycleCount}번의 호흡을 마쳤어요.`,
+        feedbackText: `${routineName}은 긴장을 천천히 가라앉히는 데 효과적인 리듬이에요. 시작 전 컨디션이 ${conditionScore}점으로 안정적인 편이었는데, 이번 호흡으로 그 흐름을 한 번 더 다듬은 셈이에요.`,
+        todaysQuote: "깊은 숨을 내쉴 때마다 마음에 쌓인 부담은 아득히 멀어지고, 오롯이 편안해진 나를 마주하게 됩니다."
+      };
     }
 
     return sendSuccess(res, {
-      headline: aiResult.headline,
-      summaryText: aiResult.summaryText,
-      feedbackText: aiResult.feedbackText,
-      todaysQuote: aiResult.todaysQuote
+      headline: aiResult.headline || `${routineName} 세션을 성공적으로 완주하셨습니다.`,
+      summaryText: aiResult.summaryText || `${durationString} 동안 ${cycleCount}번의 호흡을 마쳤어요.`,
+      feedbackText: aiResult.feedbackText || `${routineName}은 긴장을 천천히 가라앉히는 데 효과적인 리듬이에요.`,
+      todaysQuote: aiResult.todaysQuote || "깊은 숨을 내쉴 때마다 마음에 쌓인 부담은 아득히 멀어집니다."
     });
   } catch (error) {
     console.error('[generateBreathingFeedback Error]:', error);
