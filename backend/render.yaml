@@ -1,0 +1,18 @@
+# Render Blueprint Specification for BPACE Backend (100% $0 Free Tier)
+services:
+  - type: web
+    name: bpace-backend
+    env: node
+    region: singapore
+    plan: free
+    buildCommand: npm install && npx prisma generate && npx prisma db push
+    startCommand: node src/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false

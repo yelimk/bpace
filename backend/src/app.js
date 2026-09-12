@@ -18,16 +18,10 @@ const breathingLogRoutes = require('./routes/breathingLogRoutes');
 const statisticsRoutes = require('./routes/statisticsRoutes');
 const scheduleRoutes = require('./routes/scheduleRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const healthRoutes = require('./routes/healthRoutes');
 
-// Health Check API
-app.get('/api/health', (req, res) => {
-  return sendSuccess(res, {
-    status: 'ok',
-    message: 'BPACE Backend API is running',
-    timestamp: new Date().toISOString(),
-    env: process.env.NODE_ENV || 'development'
-  });
-});
+// API Routes Mounting
+app.use('/api/health', healthRoutes);
 
 // API Routes Mounting
 app.use('/api/auth', authRoutes);
