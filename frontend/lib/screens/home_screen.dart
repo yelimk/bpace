@@ -277,7 +277,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildConditionIndexCard() {
     final latestRes = PpgSensorService.latestResult;
     final displayScore = latestRes != null
-        ? (latestRes.hrvSdnnMs * 1.4 + 40).clamp(50.0, 96.0).round()
+        ? latestRes.conditionScore
         : conditionScore;
 
     return Container(
@@ -626,7 +626,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               scheduleTitle: id,
                             ),
                           ),
-                        ).then((_) => _loadHomeSchedules());
+                        ).then((_) {
+                          _loadSavedMeasurementData();
+                          _loadHomeSchedules();
+                        });
                       },
               ),
             );
@@ -729,7 +732,10 @@ class _HomeScreenState extends State<HomeScreen> {
               MaterialPageRoute(
                 builder: (context) => const ConditionMeasurementScreen(),
               ),
-            );
+            ).then((_) {
+              _loadSavedMeasurementData();
+              _loadHomeSchedules();
+            });
           },
           child: Container(
             width: 58,
