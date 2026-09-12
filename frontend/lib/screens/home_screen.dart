@@ -45,10 +45,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadHomeSchedules() async {
     final loaded = await ScheduleStorageService.loadSchedules();
+    final now = DateTime.now();
     if (mounted) {
       setState(() {
-        // 홈 화면 '오늘의 일정' 카드는 준비완료(리추얼 완료)된 일정은 제외하고 미완료된 예정 일정만 표시
-        _homeSchedules = loaded.where((s) => s['isCompleted'] != true).toList();
+        // 홈 화면 '오늘의 일정' 카드는 오늘(Today) 날짜의 예정된 미완료 일정만 표시
+        _homeSchedules = loaded.where((s) {
+          final isUncompleted = s['isCompleted'] != true;
+          final d = s['date'];
+          if (d is DateTime) {
+            return isUncompleted &&
+                d.year == now.year &&
+                d.month == now.month &&
+                d.day == now.day;
+          }
+          return isUncompleted;
+        }).toList();
       });
     }
   }
