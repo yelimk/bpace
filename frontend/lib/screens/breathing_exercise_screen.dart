@@ -256,6 +256,7 @@ class _BreathingExerciseScreenState extends State<BreathingExerciseScreen>
           cycleCount: currentCycle,
           hrvChange: '$averageHrvBpmChange bpm',
           targetScheduleId: widget.targetScheduleId,
+          isAdaptiveRamp: widget.isAdaptiveRamp,
         ),
       ),
     );

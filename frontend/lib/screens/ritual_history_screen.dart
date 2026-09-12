@@ -21,6 +21,7 @@ class RitualRecordItem {
   final double? holdSec;
   final double? exhaleSec;
   final double? hold2Sec;
+  final bool isAdaptiveRamp;
 
   const RitualRecordItem({
     required this.title,
@@ -36,6 +37,7 @@ class RitualRecordItem {
     this.holdSec,
     this.exhaleSec,
     this.hold2Sec,
+    this.isAdaptiveRamp = false,
   });
 }
 
@@ -82,6 +84,7 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
       inhaleSec: 4.0,
       holdSec: 7.0,
       exhaleSec: 8.0,
+      isAdaptiveRamp: true,
     ),
     RitualRecordItem(
       title: '생리학적 한숨',
@@ -182,6 +185,7 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
             aiHeadline: decoded['aiHeadline'] as String?,
             aiQuote: decoded['aiQuote'] as String?,
             aiFeedbackText: decoded['aiFeedbackText'] as String?,
+            isAdaptiveRamp: decoded['isAdaptiveRamp'] as bool? ?? false,
           ),
         );
       } catch (_) {}
@@ -211,6 +215,7 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
                   inhaleSec: 4.0,
                   holdSec: 7.0,
                   exhaleSec: 8.0,
+                  isAdaptiveRamp: true,
                 ),
                 RitualRecordItem(
                   title: '세미 박스 호흡',
@@ -542,6 +547,7 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
           initialQuote: item.aiQuote,
           initialFeedbackText: item.aiFeedbackText,
           isAlreadySaved: true,
+          isAdaptiveRamp: item.isAdaptiveRamp,
         ),
       ),
     ).then((_) => _loadSavedRecords());
@@ -558,6 +564,9 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
           targetHoldSec: item.holdSec,
           targetExhaleSec: item.exhaleSec,
           targetHold2Sec: item.hold2Sec,
+          isAdaptiveRamp: item.isAdaptiveRamp,
+          initialInhaleSec: item.isAdaptiveRamp ? 2.8 : null,
+          initialExhaleSec: item.isAdaptiveRamp ? 3.4 : null,
         ),
       ),
     );

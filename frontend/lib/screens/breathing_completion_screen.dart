@@ -9,7 +9,6 @@ import '../utils/schedule_storage_service.dart';
 import '../services/api_client.dart';
 import '../services/report_service.dart';
 import 'breathing_exercise_screen.dart';
-import 'ritual_history_screen.dart';
 
 /// Breathing Completion Screen (Ritual Feedback - 스크롤 가능한 호흡 종료 피드백 화면)
 class BreathingCompletionScreen extends StatefulWidget {
@@ -23,6 +22,7 @@ class BreathingCompletionScreen extends StatefulWidget {
   final String? initialQuote;
   final String? initialFeedbackText;
   final bool isAlreadySaved;
+  final bool isAdaptiveRamp;
 
   const BreathingCompletionScreen({
     super.key,
@@ -36,6 +36,7 @@ class BreathingCompletionScreen extends StatefulWidget {
     this.initialQuote,
     this.initialFeedbackText,
     this.isAlreadySaved = false,
+    this.isAdaptiveRamp = false,
   });
 
   @override
@@ -44,7 +45,6 @@ class BreathingCompletionScreen extends StatefulWidget {
 }
 
 class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
-  bool _isSaved = false;
   bool _isBookmarked = false;
 
   BreathingFeedback? _aiFeedback;
@@ -54,7 +54,6 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
   @override
   void initState() {
     super.initState();
-    _isSaved = widget.isAlreadySaved;
     _loadBookmarkStatus();
 
     if (widget.initialQuote != null && widget.initialQuote!.isNotEmpty) {
@@ -162,18 +161,19 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
     }
   }
 
+  bool _isSaving = false;
+
   Future<void> _onSaveRecord() async {
-    if (_isSaved && widget.isAlreadySaved) {
+    if (widget.isAlreadySaved) {
       if (mounted) Navigator.of(context).pop();
       return;
     }
 
-    final prefs = await SharedPreferences.getInstance();
+    if (_isSaving) return;
+    _isSaving = true;
 
-    if (!_isSaved) {
-      setState(() {
-        _isSaved = true;
-      });
+    try {
+      final prefs = await SharedPreferences.getInstance();
 
       // 1. Format current timestamp
       final now = DateTime.now();
@@ -204,6 +204,7 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
         'aiHeadline': _aiFeedback?.headline ?? '',
         'aiQuote': _aiFeedback?.todaysQuote ?? '',
         'aiFeedbackText': _aiFeedback?.feedbackText ?? '',
+        'isAdaptiveRamp': widget.isAdaptiveRamp,
       };
 
       // 2. Save record to SharedPreferences (Local Storage)
@@ -240,15 +241,13 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
         await prefs.setInt('ritual_streak_days', currentStreak + 1);
         await prefs.setString('last_ritual_date', todayStr);
       }
+    } catch (e) {
+      debugPrint('[BreathingCompletionScreen] Save record error: $e');
     }
 
-    // 4. Navigate directly to RitualHistoryScreen (Ritual 기록 화면)
+    // 5. Navigate directly back to Home Screen
     if (mounted) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => const RitualHistoryScreen(),
-        ),
-      );
+      Navigator.of(context).popUntil((route) => route.isFirst);
     }
   }
 
@@ -850,6 +849,7 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
 
   /// Bottom Fixed Action Bar: "Ritual 기록 저장"
   Widget _buildBottomSaveBar() {
+    final isViewOnly = widget.isAlreadySaved;
     return Container(
       color: AppColors.darkBg,
       padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 10.0, bottom: 20.0),
@@ -860,39 +860,38 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
           heightFactor: 1.0,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),
-            child: GestureDetector(
-              onTap: _onSaveRecord,
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                decoration: BoxDecoration(
-                  color: _isSaved ? const Color(0xFF384534) : const Color(0xFFE2FFDA),
-                  borderRadius: BorderRadius.circular(28),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(90),
-                      blurRadius: 18,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (_isSaved) ...[
-                      const Icon(Icons.check_rounded, color: AppColors.lightMint, size: 20),
-                      const SizedBox(width: 6),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: _onSaveRecord,
+                borderRadius: BorderRadius.circular(28),
+                splashColor: Colors.black.withAlpha(50),
+                highlightColor: Colors.black.withAlpha(25),
+                child: Ink(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE2FFDA),
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(90),
+                        blurRadius: 18,
+                        spreadRadius: 2,
+                      ),
                     ],
-                    Text(
-                      _isSaved ? 'Ritual 기록 저장됨' : 'Ritual 기록 저장',
-                      style: TextStyle(
+                  ),
+                  child: Center(
+                    child: Text(
+                      isViewOnly ? '확인' : 'Ritual 기록 저장',
+                      style: const TextStyle(
                         fontFamily: AppFonts.pretendard,
                         fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: _isSaved ? AppColors.lightMint : AppColors.darkBg,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.darkBg,
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
