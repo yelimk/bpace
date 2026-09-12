@@ -20,13 +20,10 @@ async function generateAiContent(promptText) {
     throw error;
   }
 
-  // 사용자 대시보드 드롭다운의 공식 Flash 무료 모델 라인업 (100% $0)
+  // 최고 퀄리티를 보장하는 최신 Flash 정예 모델만 유지 (저품질 경량 모델 제외)
   const modelCandidates = [
     'gemini-3.8-flash',
-    'gemini-3.6-flash',
-    'gemini-3.5-flash',
-    'gemini-3.5-flash-lite',
-    'gemini-3.1-flash-lite'
+    'gemini-3.6-flash'
   ];
 
   let lastError = null;
