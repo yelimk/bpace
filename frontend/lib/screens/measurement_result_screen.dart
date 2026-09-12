@@ -33,40 +33,10 @@ class _MeasurementResultScreenState extends State<MeasurementResultScreen> {
   int? _pastAvgHrv;
   Map<String, dynamic>? _upcomingSchedule;
 
-  WeeklyReport? _aiReport;
-  bool _isLoadingAi = false;
-
   @override
   void initState() {
     super.initState();
     _loadScheduleAndSavePrefs();
-    _fetchAiAnalysis();
-  }
-
-  Future<void> _fetchAiAnalysis() async {
-    final activeResult = widget.result ?? PpgMeasurementResult.defaultSample();
-    final score = (activeResult.hrvSdnnMs * 1.4 + 40).clamp(50.0, 96.0).round();
-    if (mounted) setState(() => _isLoadingAi = true);
-    try {
-      final report = await ReportService.instance.generate(
-        avgBpm: activeResult.bpm,
-        maxBpm: activeResult.bpm + 8,
-        minBpm: activeResult.bpm - 8,
-        hrvSdnnMs: activeResult.hrvSdnnMs.round(),
-        conditionScore: score,
-      );
-      if (mounted) {
-        setState(() {
-          _aiReport = report;
-          _isLoadingAi = false;
-        });
-      }
-    } catch (e) {
-      debugPrint('[MeasurementResultScreen] Gemini AI fetch error: $e');
-      if (mounted) {
-        setState(() => _isLoadingAi = false);
-      }
-    }
   }
 
   Future<void> _loadScheduleAndSavePrefs() async {
@@ -787,43 +757,19 @@ class _MeasurementResultScreenState extends State<MeasurementResultScreen> {
     );
   }
 
-  /// 4. AI Analysis Card
+  /// 4. 호흡 추천 Card
   Widget _buildAiAnalysisSection(int score, BreathingRoutineModel routine, PpgMeasurementResult res) {
-    final headlineText = _aiReport?.headline.isNotEmpty == true
-        ? _aiReport!.headline
-        : '$score점 컨디션에 맞춰 ${routine.totalDurationMinutes}분, ${routine.intensity} 강도로 조정했어요';
-        
-    final bodyText = _aiReport?.overallGuide.isNotEmpty == true
-        ? _aiReport!.overallGuide
-        : (_aiReport?.avgBpmAnalysis.isNotEmpty == true
-            ? _aiReport!.avgBpmAnalysis
-            : '오늘 일정을 종합 분석한 결과입니다.\n지금 컨디션에 맞춰 ${routine.title}(으)로 리듬을 정돈해보세요.');
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'AI 분석 · 호흡 추천',
-              style: TextStyle(
-                fontFamily: AppFonts.pretendard,
-                fontSize: 17,
-                fontWeight: FontWeight.w400,
-                color: AppColors.white,
-              ),
-            ),
-            if (_isLoadingAi)
-              const SizedBox(
-                width: 14,
-                height: 14,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppColors.lightMint,
-                ),
-              ),
-          ],
+        const Text(
+          '호흡 추천',
+          style: TextStyle(
+            fontFamily: AppFonts.pretendard,
+            fontSize: 17,
+            fontWeight: FontWeight.w400,
+            color: AppColors.white,
+          ),
         ),
         const SizedBox(height: 14),
 
@@ -842,7 +788,7 @@ class _MeasurementResultScreenState extends State<MeasurementResultScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                headlineText,
+                '$score점 컨디션에 맞춰 ${routine.totalDurationMinutes}분, ${routine.intensity} 강도로 조정했어요',
                 style: const TextStyle(
                   fontFamily: AppFonts.pretendard,
                   fontSize: 15,
@@ -852,8 +798,20 @@ class _MeasurementResultScreenState extends State<MeasurementResultScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              Text(
-                bodyText,
+              Text.rich(
+                TextSpan(
+                  children: [
+                    const TextSpan(text: '오늘 일정을 종합 분석한 결과입니다.\n지금 컨디션에 맞춰 '),
+                    TextSpan(
+                      text: routine.title,
+                      style: const TextStyle(
+                        color: AppColors.lightMint,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const TextSpan(text: '(으)로 리듬을 정돈해보세요.'),
+                  ],
+                ),
                 style: const TextStyle(
                   fontFamily: AppFonts.pretendard,
                   fontSize: 13.5,
