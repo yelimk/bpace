@@ -860,35 +860,36 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
           heightFactor: 1.0,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: _onSaveRecord,
-                borderRadius: BorderRadius.circular(28),
-                splashColor: Colors.black.withAlpha(50),
-                highlightColor: Colors.black.withAlpha(25),
-                child: Ink(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE2FFDA),
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha(90),
-                        blurRadius: 18,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Text(
-                      isViewOnly ? '확인' : 'Ritual 기록 저장',
-                      style: const TextStyle(
-                        fontFamily: AppFonts.pretendard,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.darkBg,
+            child: SizedBox(
+              height: 52,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: _onSaveRecord,
+                  borderRadius: BorderRadius.circular(28),
+                  splashColor: Colors.black.withAlpha(50),
+                  highlightColor: Colors.black.withAlpha(25),
+                  child: Ink(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE2FFDA),
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(90),
+                          blurRadius: 18,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        isViewOnly ? '확인' : 'Ritual 기록 저장',
+                        style: const TextStyle(
+                          fontFamily: AppFonts.pretendard,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.darkBg,
+                        ),
                       ),
                     ),
                   ),
