@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,6 +8,7 @@ import '../utils/responsive.dart';
 import '../utils/schedule_storage_service.dart';
 import '../services/report_service.dart';
 import 'breathing_exercise_screen.dart';
+import 'ritual_history_screen.dart';
 
 /// Breathing Completion Screen (Ritual Feedback - 스크롤 가능한 호흡 종료 피드백 화면)
 class BreathingCompletionScreen extends StatefulWidget {
@@ -114,10 +116,75 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
     }
   }
 
-  void _onSaveRecord() {
-    setState(() {
-      _isSaved = true;
-    });
+  Future<void> _onSaveRecord() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    if (!_isSaved) {
+      setState(() {
+        _isSaved = true;
+      });
+
+      // 1. Format current timestamp
+      final now = DateTime.now();
+      final month = now.month.toString().padLeft(2, '0');
+      final day = now.day.toString().padLeft(2, '0');
+      final period = now.hour < 12 ? '오전' : '오후';
+      final hour = now.hour == 0 ? 12 : (now.hour > 12 ? now.hour - 12 : now.hour);
+      final minute = now.minute.toString().padLeft(2, '0');
+      final timestampStr = '${now.year}.$month.$day $period $hour:$minute';
+
+      int durationSec = 304;
+      if (widget.durationString.contains(':')) {
+        final parts = widget.durationString.split(':');
+        if (parts.length == 2) {
+          final m = int.tryParse(parts[0]) ?? 0;
+          final s = int.tryParse(parts[1]) ?? 0;
+          durationSec = m * 60 + s;
+        }
+      }
+
+      final recordMap = {
+        'title': widget.title,
+        'timestamp': timestampStr,
+        'bgImagePath': widget.bgImagePath,
+        'durationSeconds': durationSec,
+        'cycleCount': widget.cycleCount,
+      };
+
+      // 2. Save record to SharedPreferences (Local Storage)
+      final historyList = prefs.getStringList('saved_ritual_history_v1') ?? [];
+      historyList.insert(0, jsonEncode(recordMap));
+      await prefs.setStringList('saved_ritual_history_v1', historyList);
+
+      // 3. Save record to Render Server DB (/api/breathing-logs)
+      try {
+        ApiClient.instance.post('/api/breathing-logs', body: {
+          'category': '이완',
+          'routineName': widget.title,
+          'durationSeconds': durationSec,
+          'completionRate': 100.0,
+        });
+      } catch (e) {
+        debugPrint('[BreathingCompletionScreen] Server DB upload error: $e');
+      }
+
+      // 4. Update weekly ritual count & total ritual minutes
+      final currentWeeklyCount = prefs.getInt('weekly_ritual_count') ?? 4;
+      await prefs.setInt('weekly_ritual_count', currentWeeklyCount + 1);
+
+      final durationMinutes = (durationSec / 60).round().clamp(1, 60);
+      final currentTotalMinutes = prefs.getInt('total_ritual_minutes') ?? 326;
+      await prefs.setInt('total_ritual_minutes', currentTotalMinutes + durationMinutes);
+    }
+
+    // 4. Navigate directly to RitualHistoryScreen (Ritual 기록 화면)
+    if (mounted) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => const RitualHistoryScreen(),
+        ),
+      );
+    }
   }
 
   @override

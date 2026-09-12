@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../utils/responsive.dart';
@@ -53,10 +55,10 @@ class RitualHistoryScreen extends StatefulWidget {
 class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
   late int _selectedTabIndex; // 0: 이번 주, 1: 전체 기록
 
-  late List<RitualMonthGroup> _monthGroups;
+  List<RitualRecordItem> _thisWeekRecords = [];
+  List<RitualMonthGroup> _monthGroups = [];
 
-  // Data for "이번 주"
-  static const List<RitualRecordItem> _thisWeekRecords = [
+  static const List<RitualRecordItem> _defaultThisWeekRecords = [
     RitualRecordItem(
       title: '4-7-8 호흡',
       timestamp: '2026.09.07 오후 8:30',
@@ -97,46 +99,12 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
   void initState() {
     super.initState();
     _selectedTabIndex = widget.initialTabIndex;
+    _thisWeekRecords = List.from(_defaultThisWeekRecords);
     _monthGroups = [
       RitualMonthGroup(
         monthHeader: '2026년 9월',
-        isExpanded: true, // Expand current month by default
-        items: const [
-          RitualRecordItem(
-            title: '4-7-8 호흡',
-            timestamp: '2026.09.07 오후 8:30',
-            bgImagePath: 'assets/images/bg_breath_478.png',
-            inhaleSec: 4.0,
-            holdSec: 7.0,
-            exhaleSec: 8.0,
-          ),
-          RitualRecordItem(
-            title: '생리학적 한숨',
-            timestamp: '2026.09.07 오후 12:30',
-            bgImagePath: 'assets/images/bg_breath_sigh.png',
-            inhaleSec: 2.0,
-            inhale2Sec: 1.5,
-            exhaleSec: 4.5,
-          ),
-          RitualRecordItem(
-            title: '4-4-4-4 호흡',
-            timestamp: '2026.09.07 오전 11:00',
-            bgImagePath: 'assets/images/bg_breath_box_4444.png',
-            inhaleSec: 4.0,
-            holdSec: 4.0,
-            exhaleSec: 4.0,
-            hold2Sec: 4.0,
-          ),
-          RitualRecordItem(
-            title: '4-1-2-1 호흡',
-            timestamp: '2026.09.07 오전 9:30',
-            bgImagePath: 'assets/images/bg_breath_awakening.png',
-            inhaleSec: 4.0,
-            holdSec: 1.0,
-            exhaleSec: 2.0,
-            hold2Sec: 1.0,
-          ),
-        ],
+        isExpanded: true,
+        items: List.from(_defaultThisWeekRecords),
       ),
       RitualMonthGroup(
         monthHeader: '2026년 8월',
@@ -162,6 +130,67 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
         ],
       ),
     ];
+    _loadSavedRecords();
+  }
+
+  Future<void> _loadSavedRecords() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedJsonList = prefs.getStringList('saved_ritual_history_v1') ?? [];
+
+    final List<RitualRecordItem> dynamicSavedItems = [];
+    for (final raw in savedJsonList) {
+      try {
+        final decoded = jsonDecode(raw) as Map<String, dynamic>;
+        dynamicSavedItems.add(
+          RitualRecordItem(
+            title: decoded['title'] as String? ?? '4-7-8 호흡',
+            timestamp: decoded['timestamp'] as String? ?? '',
+            bgImagePath: decoded['bgImagePath'] as String? ?? 'assets/images/bg_breath_478.png',
+          ),
+        );
+      } catch (_) {}
+    }
+
+    if (dynamicSavedItems.isNotEmpty) {
+      final combined = [...dynamicSavedItems, ..._defaultThisWeekRecords];
+      final currentMonthStr = '${DateTime.now().year}년 ${DateTime.now().month}월';
+
+      if (mounted) {
+        setState(() {
+          _thisWeekRecords = combined;
+          _monthGroups = [
+            RitualMonthGroup(
+              monthHeader: currentMonthStr,
+              isExpanded: true,
+              items: combined,
+            ),
+            RitualMonthGroup(
+              monthHeader: '2026년 8월',
+              isExpanded: false,
+              items: const [
+                RitualRecordItem(
+                  title: '4-7-8 호흡',
+                  timestamp: '2026.08.28 오후 9:15',
+                  bgImagePath: 'assets/images/bg_breath_478.png',
+                  inhaleSec: 4.0,
+                  holdSec: 7.0,
+                  exhaleSec: 8.0,
+                ),
+                RitualRecordItem(
+                  title: '세미 박스 호흡',
+                  timestamp: '2026.08.15 오후 2:40',
+                  bgImagePath: 'assets/images/bg_breath_semi_box.png',
+                  inhaleSec: 4.0,
+                  holdSec: 2.0,
+                  exhaleSec: 4.0,
+                  hold2Sec: 2.0,
+                ),
+              ],
+            ),
+          ];
+        });
+      }
+    }
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../utils/responsive.dart';
@@ -19,6 +20,33 @@ class MyPageScreen extends StatefulWidget {
 
 class _MyPageScreenState extends State<MyPageScreen> {
   bool get _isLoggedIn => ApiClient.instance.isLoggedIn;
+
+  int _weeklyRitualCount = 4;
+  int _totalRitualMinutes = 326;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStats();
+  }
+
+  Future<void> _loadStats() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedJsonList = prefs.getStringList('saved_ritual_history_v1') ?? [];
+
+    final storedCount = prefs.getInt('weekly_ritual_count');
+    final storedMinutes = prefs.getInt('total_ritual_minutes');
+
+    final count = storedCount ?? (4 + savedJsonList.length);
+    final minutes = storedMinutes ?? (326 + (savedJsonList.length * 5));
+
+    if (mounted) {
+      setState(() {
+        _weeklyRitualCount = count;
+        _totalRitualMinutes = minutes;
+      });
+    }
+  }
 
   Future<void> _onProfileTapped() async {
     if (!_isLoggedIn) {
@@ -262,9 +290,9 @@ class _MyPageScreenState extends State<MyPageScreen> {
                               crossAxisAlignment: CrossAxisAlignment.baseline,
                               textBaseline: TextBaseline.alphabetic,
                               children: [
-                                const Text(
-                                  '4',
-                                  style: TextStyle(
+                                Text(
+                                  '$_weeklyRitualCount',
+                                  style: const TextStyle(
                                     fontFamily: AppFonts.pretendard,
                                     fontSize: 38,
                                     fontWeight: FontWeight.w400,
@@ -329,9 +357,9 @@ class _MyPageScreenState extends State<MyPageScreen> {
                             crossAxisAlignment: CrossAxisAlignment.baseline,
                             textBaseline: TextBaseline.alphabetic,
                             children: [
-                              const Text(
-                                '326',
-                                style: TextStyle(
+                              Text(
+                                '$_totalRitualMinutes',
+                                style: const TextStyle(
                                   fontFamily: AppFonts.pretendard,
                                   fontSize: 32,
                                   fontWeight: FontWeight.w400,
