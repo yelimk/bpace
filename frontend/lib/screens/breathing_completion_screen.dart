@@ -5,6 +5,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../utils/responsive.dart';
 import '../utils/schedule_storage_service.dart';
+import '../services/report_service.dart';
 import 'breathing_exercise_screen.dart';
 
 /// Breathing Completion Screen (Ritual Feedback - 스크롤 가능한 호흡 종료 피드백 화면)
@@ -35,12 +36,38 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
   bool _isSaved = false;
   bool _isBookmarked = false;
 
+  BreathingFeedback? _aiFeedback;
+  bool _isLoadingFeedback = false;
+
   @override
   void initState() {
     super.initState();
     _loadBookmarkStatus();
+    _fetchAiFeedback();
     if (widget.targetScheduleId != null && widget.targetScheduleId!.isNotEmpty) {
       ScheduleStorageService.completeSchedule(widget.targetScheduleId);
+    }
+  }
+
+  Future<void> _fetchAiFeedback() async {
+    if (mounted) setState(() => _isLoadingFeedback = true);
+    try {
+      final feedback = await ReportService.instance.generateFeedback(
+        routineName: widget.title,
+        durationSeconds: 304,
+        cycleCount: widget.cycleCount,
+      );
+      if (mounted) {
+        setState(() {
+          _aiFeedback = feedback;
+          _isLoadingFeedback = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('[BreathingCompletionScreen] Gemini AI feedback fetch error: $e');
+      if (mounted) {
+        setState(() => _isLoadingFeedback = false);
+      }
     }
   }
 
@@ -547,6 +574,14 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
 
   /// 5. AI Analysis Container Card matching 1st screenshot
   Widget _buildAiAnalysisCard() {
+    final subheader = _aiFeedback?.todaysQuote.isNotEmpty == true
+        ? '"${_aiFeedback!.todaysQuote}"'
+        : '심박수가 높아지는 순간, 리추얼이 도움이 될 수 있어요';
+
+    final bodyAnalysis = _aiFeedback?.feedbackText.isNotEmpty == true
+        ? _aiFeedback!.feedbackText
+        : '${widget.title}은 긴장을 천천히 가라앉히는 데 효과적인 리듬으로 알려져 있어요. 시작 전 컨디션이 78점으로 이미 안정적인 편이었는데, 이번 Ritual로 그 흐름을 한 번 더 다듬은 셈이에요.';
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -557,15 +592,30 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Subheader line (without '>' arrow icon matching 1st screenshot)
-          const Text(
-            '심박수가 높아지는 순간, 리추얼이 도움이 될 수 있어요',
-            style: TextStyle(
-              fontFamily: AppFonts.pretendard,
-              fontSize: 14.5,
-              fontWeight: FontWeight.w400,
-              color: AppColors.white,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  subheader,
+                  style: const TextStyle(
+                    fontFamily: AppFonts.pretendard,
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.white,
+                  ),
+                ),
+              ),
+              if (_isLoadingFeedback)
+                const SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.lightMint,
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 18),
 
@@ -596,7 +646,7 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
 
           // Body Analysis Text matching 1st screenshot (밑줄 제거, 단일 톤)
           Text(
-            '${widget.title}은 긴장을 천천히 가라앉히는 데 효과적인 리듬으로 알려져 있어요. 시작 전 컨디션이 78점으로 이미 안정적인 편이었는데, 이번 Ritual로 그 흐름을 한 번 더 다듬은 셈이에요.',
+            bodyAnalysis,
             style: const TextStyle(
               fontFamily: AppFonts.pretendard,
               fontSize: 13.5,

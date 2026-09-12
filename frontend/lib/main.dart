@@ -8,12 +8,16 @@ import 'services/push_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Restore the saved token before the first frame, so a returning user goes
-  // straight to home instead of flashing the login screen on every launch.
-  await ApiClient.instance.restoreSession();
-  // Firebase has to be up before the first frame so a notification that
-  // launched the app is still readable via getInitialMessage().
-  await PushService.initialize();
+  try {
+    await ApiClient.instance.restoreSession();
+  } catch (e) {
+    debugPrint('Session restore skipped: $e');
+  }
+  try {
+    await PushService.initialize();
+  } catch (e) {
+    debugPrint('Push init skipped: $e');
+  }
   runApp(const BreathCareApp());
 }
 

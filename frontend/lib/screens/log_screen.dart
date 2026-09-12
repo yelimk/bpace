@@ -13,6 +13,7 @@ import 'condition_measurement_screen.dart';
 import 'my_page_screen.dart';
 import 'add_schedule_modal.dart';
 import '../utils/schedule_storage_service.dart';
+import '../services/report_service.dart';
 
 class LogScreen extends StatefulWidget {
   final int initialSubTab;
@@ -103,6 +104,9 @@ class _LogScreenState extends State<LogScreen> {
 
   bool _isLoadingSchedules = false;
 
+  WeeklyReport? _aiReport;
+  bool _isLoadingAiReport = false;
+
   @override
   void initState() {
     super.initState();
@@ -112,6 +116,31 @@ class _LogScreenState extends State<LogScreen> {
     _currentDisplayMonth = DateTime(now.year, now.month, 1);
     _loadSchedules();
     _loadConditionScores();
+    _fetchAiReport();
+  }
+
+  Future<void> _fetchAiReport() async {
+    if (_isLoadingAiReport) return;
+    setState(() => _isLoadingAiReport = true);
+    try {
+      final report = await ReportService.instance.generate(
+        avgBpm: int.tryParse(_avgHrStr) ?? 82,
+        maxBpm: int.tryParse(_maxHrStr) ?? 94,
+        minBpm: int.tryParse(_minHrStr) ?? 68,
+        hrvSdnnMs: int.tryParse(_avgHrvStr) ?? 22,
+        conditionScore: _weeklyAvgConditionScore,
+      );
+      if (mounted) {
+        setState(() {
+          _aiReport = report;
+          _isLoadingAiReport = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoadingAiReport = false);
+      }
+    }
   }
 
   /// Loads schedules from local storage (ScheduleStorageService) and server events.
@@ -1803,17 +1832,47 @@ class _LogScreenState extends State<LogScreen> {
 
   /// 4. AI 분석 · 현재 상태 카드
   Widget _buildAiAnalysisCard() {
+    final headline = _aiReport?.headline.isNotEmpty == true
+        ? _aiReport!.headline
+        : '심박수가 높아지는 순간, 리추얼이 도움이 될 수 있어요';
+    final avgAnalysis = _aiReport?.avgBpmAnalysis.isNotEmpty == true
+        ? _aiReport!.avgBpmAnalysis
+        : '오늘의 평균 심박수는 $_avgHrStr BPM으로, 정상 범위 내에서 안정적인 상태를 유지하고 있어요.';
+    final maxAnalysis = _aiReport?.maxBpmAnalysis.isNotEmpty == true
+        ? _aiReport!.maxBpmAnalysis
+        : '다만, 최고 심박수가 $_maxHrStr BPM까지 상승한 순간이 있었어요. 이는 일시적인 긴장이나 집중, 혹은 다가오는 일정에 대한 준비 상태로 볼 수 있어요.';
+    final minAnalysis = _aiReport?.minBpmAnalysis.isNotEmpty == true
+        ? _aiReport!.minBpmAnalysis
+        : '최저 심박수는 $_minHrStr BPM으로 관찰되며, 이는 리추얼 이후 이완된 상태에서 나타나는 자연스러운 수치예요.';
+    final overallGuide = _aiReport?.overallGuide.isNotEmpty == true
+        ? _aiReport!.overallGuide
+        : '전반적인 컨디션은 양호한 편이며, 심박수가 높아지는 순간엔 짧은 리추얼로 미리 준비해보는 걸 추천드려요.';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'AI 분석 · 현재 상태',
-          style: TextStyle(
-            fontFamily: AppFonts.pretendard,
-            fontSize: 18,
-            fontWeight: FontWeight.w400,
-            color: Colors.white,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'AI 분석 · 현재 상태',
+              style: TextStyle(
+                fontFamily: AppFonts.pretendard,
+                fontSize: 18,
+                fontWeight: FontWeight.w400,
+                color: Colors.white,
+              ),
+            ),
+            if (_isLoadingAiReport)
+              const SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.lightMint,
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: 14),
 
@@ -1827,10 +1886,10 @@ class _LogScreenState extends State<LogScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header title (No chevron >)
-              const Text(
-                '심박수가 높아지는 순간, 리추얼이 도움이 될 수 있어요',
-                style: TextStyle(
+              // Header title
+              Text(
+                headline,
+                style: const TextStyle(
                   fontFamily: AppFonts.pretendard,
                   fontSize: 15,
                   fontWeight: FontWeight.w400,
@@ -1840,53 +1899,15 @@ class _LogScreenState extends State<LogScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Rich Text Insights
-              RichText(
-                text: TextSpan(
-                  style: const TextStyle(
-                    fontFamily: AppFonts.pretendard,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xFF90939A),
-                    height: 1.6,
-                  ),
-                  children: [
-                    const TextSpan(text: '오늘의 평균 심박수는 '),
-                    TextSpan(
-                      text: '$_avgHrStr BPM',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const TextSpan(text: '으로,\n정상 범위 내에서 안정적인 상태를 유지하고 있어요.\n\n'),
-                    const TextSpan(text: '다만, 최고 심박수가 '),
-                    TextSpan(
-                      text: '$_maxHrStr BPM',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const TextSpan(text: '까지 상승한 순간이 있었어요.\n이는 일시적인 긴장이나 집중, 혹은 다가오는 일정에 대한 준비 상태로 볼 수 있어요.\n\n'),
-                    const TextSpan(text: '최저 심박수는 '),
-                    TextSpan(
-                      text: '$_minHrStr BPM',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const TextSpan(text: '으로 관찰되며,\n이는 리추얼 이후 이완된 상태에서 나타나는 자연스러운 수치예요.\n\n'),
-                    const TextSpan(text: '전반적인 컨디션은 양호한 편이며, 심박수가 높아지는 순간엔\n'),
-                    const TextSpan(
-                      text: '짧은 리추얼로 미리 준비해보는 걸 추천드려요.',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFFE4FBCB),
-                      ),
-                    ),
-                  ],
+              // Dynamic Gemini AI Analysis Sections
+              Text(
+                '$avgAnalysis\n\n$maxAnalysis\n\n$minAnalysis\n\n$overallGuide',
+                style: const TextStyle(
+                  fontFamily: AppFonts.pretendard,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF90939A),
+                  height: 1.6,
                 ),
               ),
             ],
