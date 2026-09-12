@@ -6,6 +6,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../utils/responsive.dart';
 import '../utils/schedule_storage_service.dart';
+import '../services/api_client.dart';
 import '../services/report_service.dart';
 import 'breathing_exercise_screen.dart';
 import 'ritual_history_screen.dart';
