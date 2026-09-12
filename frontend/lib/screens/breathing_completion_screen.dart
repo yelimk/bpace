@@ -168,13 +168,23 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
         debugPrint('[BreathingCompletionScreen] Server DB upload error: $e');
       }
 
-      // 4. Update weekly ritual count & total ritual minutes
+      // 4. Update weekly ritual count & total ritual minutes & streak
       final currentWeeklyCount = prefs.getInt('weekly_ritual_count') ?? 4;
       await prefs.setInt('weekly_ritual_count', currentWeeklyCount + 1);
 
       final durationMinutes = (durationSec / 60).round().clamp(1, 60);
       final currentTotalMinutes = prefs.getInt('total_ritual_minutes') ?? 326;
       await prefs.setInt('total_ritual_minutes', currentTotalMinutes + durationMinutes);
+
+      // Update continuous streak days if first ritual of today
+      final todayStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+      final lastDate = prefs.getString('last_ritual_date');
+      final currentStreak = prefs.getInt('ritual_streak_days') ?? 7;
+
+      if (lastDate != todayStr) {
+        await prefs.setInt('ritual_streak_days', currentStreak + 1);
+        await prefs.setString('last_ritual_date', todayStr);
+      }
     }
 
     // 4. Navigate directly to RitualHistoryScreen (Ritual 기록 화면)

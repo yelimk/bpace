@@ -23,6 +23,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
 
   int _weeklyRitualCount = 4;
   int _totalRitualMinutes = 326;
+  int _ritualStreakDays = 7;
 
   @override
   void initState() {
@@ -36,14 +37,17 @@ class _MyPageScreenState extends State<MyPageScreen> {
 
     final storedCount = prefs.getInt('weekly_ritual_count');
     final storedMinutes = prefs.getInt('total_ritual_minutes');
+    final storedStreak = prefs.getInt('ritual_streak_days');
 
     final count = storedCount ?? (4 + savedJsonList.length);
     final minutes = storedMinutes ?? (326 + (savedJsonList.length * 5));
+    final streak = storedStreak ?? 7;
 
     if (mounted) {
       setState(() {
         _weeklyRitualCount = count;
         _totalRitualMinutes = minutes;
+        _ritualStreakDays = streak;
       });
     }
   }
@@ -417,9 +421,9 @@ class _MyPageScreenState extends State<MyPageScreen> {
                             crossAxisAlignment: CrossAxisAlignment.baseline,
                             textBaseline: TextBaseline.alphabetic,
                             children: [
-                              const Text(
-                                '7',
-                                style: TextStyle(
+                              Text(
+                                '$_ritualStreakDays',
+                                style: const TextStyle(
                                   fontFamily: AppFonts.pretendard,
                                   fontSize: 32,
                                   fontWeight: FontWeight.w400,
