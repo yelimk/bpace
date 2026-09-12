@@ -10,6 +10,7 @@ import '../utils/ppg_sensor_service.dart';
 import '../utils/breathing_routine_model.dart';
 import '../services/api_client.dart';
 import '../services/measurement_service.dart';
+import '../models/measurement.dart';
 import 'measurement_result_screen.dart';
 
 /// `analyzing` covers the round trip to the server: the take is finished but
@@ -325,11 +326,18 @@ class _ConditionMeasurementScreenState
     setState(() => _status = MeasurementStatus.analyzing);
 
     try {
-      final measurement = ApiClient.instance.isLoggedIn
-          ? await MeasurementService.instance
-              .submit(samples: waveform, fps: fps, durationSec: durationSec)
-          : await MeasurementService.instance
-              .analyzeAsGuest(samples: waveform, fps: fps, durationSec: durationSec);
+      Measurement measurement;
+      try {
+        measurement = ApiClient.instance.isLoggedIn
+            ? await MeasurementService.instance
+                .submit(samples: waveform, fps: fps, durationSec: durationSec)
+            : await MeasurementService.instance
+                .analyzeAsGuest(samples: waveform, fps: fps, durationSec: durationSec);
+      } catch (tokenErr) {
+        debugPrint('[PPG_SUBMIT_RETRY_GUEST] Submit with token failed ($tokenErr). Retrying with analyzeAsGuest...');
+        measurement = await MeasurementService.instance
+            .analyzeAsGuest(samples: waveform, fps: fps, durationSec: durationSec);
+      }
 
       debugPrint('====================================================');
       debugPrint('[PPG_SERVER_SUCCESS] Backend server returned analyzed values!');
