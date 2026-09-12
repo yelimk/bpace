@@ -1947,68 +1947,85 @@ class _LogScreenState extends State<LogScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'AI 분석 · 현재 상태',
-              style: TextStyle(
-                fontFamily: AppFonts.pretendard,
-                fontSize: 18,
-                fontWeight: FontWeight.w400,
-                color: Colors.white,
-              ),
-            ),
-            if (_isLoadingAiReport)
-              const SizedBox(
-                width: 14,
-                height: 14,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppColors.lightMint,
-                ),
-              ),
-          ],
+        const Text(
+          'AI 분석 · 현재 상태',
+          style: TextStyle(
+            fontFamily: AppFonts.pretendard,
+            fontSize: 18,
+            fontWeight: FontWeight.w400,
+            color: Colors.white,
+          ),
         ),
         const SizedBox(height: 14),
 
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: const Color(0xFF28292D),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header title
-              Text(
-                headline,
-                style: const TextStyle(
-                  fontFamily: AppFonts.pretendard,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white,
-                  height: 1.3,
+        if (_isLoadingAiReport)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
+            decoration: BoxDecoration(
+              color: const Color(0xFF28292D),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Column(
+              children: [
+                SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: AppColors.lightMint,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
+                SizedBox(height: 16),
+                Text(
+                  '새로 변경된 생체 데이터를 기반으로 Gemini AI 리포트 분석 중...',
+                  style: TextStyle(
+                    fontFamily: AppFonts.pretendard,
+                    fontSize: 13.5,
+                    color: Color(0xFFACAEB3),
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFF28292D),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header title
+                Text(
+                  headline,
+                  style: const TextStyle(
+                    fontFamily: AppFonts.pretendard,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 20),
 
-              // Dynamic Gemini AI Analysis Sections
-              Text(
-                '$avgAnalysis\n\n$maxAnalysis\n\n$minAnalysis\n\n$overallGuide',
-                style: const TextStyle(
-                  fontFamily: AppFonts.pretendard,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  color: Color(0xFF90939A),
-                  height: 1.6,
+                // Dynamic Gemini AI Analysis Sections
+                Text(
+                  '$avgAnalysis\n\n$maxAnalysis\n\n$minAnalysis\n\n$overallGuide',
+                  style: const TextStyle(
+                    fontFamily: AppFonts.pretendard,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFF90939A),
+                    height: 1.6,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
       ],
     );
   }
