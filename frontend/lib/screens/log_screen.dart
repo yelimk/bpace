@@ -42,8 +42,12 @@ class _LogScreenState extends State<LogScreen> {
 
   String get _avgHrStr {
     if (_recordedHrHistory.isEmpty) return '82';
-    final sum = _recordedHrHistory.reduce((a, b) => a + b);
-    return (sum / _recordedHrHistory.length).round().toString();
+    final todayW = DateTime.now().weekday;
+    final todayList = _weekdayHrMap[todayW];
+    if (todayList != null && todayList.isNotEmpty) {
+      return (todayList.reduce((a, b) => a + b) / todayList.length).round().toString();
+    }
+    return _recordedHrHistory.last.toString();
   }
 
   String get _maxHrStr {
@@ -70,8 +74,12 @@ class _LogScreenState extends State<LogScreen> {
 
   String get _avgHrvStr {
     if (_allHrvValues.isEmpty) return '22';
-    final sum = _allHrvValues.reduce((a, b) => a + b);
-    return (sum / _allHrvValues.length).round().toString();
+    final todayW = DateTime.now().weekday;
+    final todayList = _weekdayHrvMap[todayW];
+    if (todayList != null && todayList.isNotEmpty) {
+      return (todayList.reduce((a, b) => a + b) / todayList.length).round().toString();
+    }
+    return _allHrvValues.last.toString();
   }
 
   String get _maxHrvStr {

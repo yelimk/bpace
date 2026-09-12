@@ -27,8 +27,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   // Dynamic state variables for measurement data
   int conditionScore = 78;
-  int heartRate = 88;
-  int hrvValue = 24;
+  int heartRate = 82;
+  int hrvValue = 22;
 
   // Selected bottom navigation index (0: Home, 1: Log, 2: Breath)
   int _selectedNavIndex = 0;
