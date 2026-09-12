@@ -20,10 +20,11 @@ async function generateAiContent(promptText) {
     throw error;
   }
 
-  // 최고 퀄리티를 보장하는 최신 Flash 정예 모델만 유지 (저품질 경량 모델 제외)
+  // 최신 고품질 정예 Flash 모델 3종 (3.8 -> 3.6 -> 3.5)
   const modelCandidates = [
     'gemini-3.8-flash',
-    'gemini-3.6-flash'
+    'gemini-3.6-flash',
+    'gemini-3.5-flash'
   ];
 
   let lastError = null;
