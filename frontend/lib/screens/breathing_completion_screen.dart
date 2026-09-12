@@ -41,6 +41,7 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
 
   BreathingFeedback? _aiFeedback;
   bool _isLoadingFeedback = false;
+  String? _aiErrorMessage;
 
   @override
   void initState() {
@@ -75,6 +76,7 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
       if (mounted) {
         setState(() {
           _aiFeedback = feedback;
+          _aiErrorMessage = null;
           _isLoadingFeedback = false;
         });
       }
@@ -82,12 +84,8 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
       debugPrint('[BreathingCompletionScreen] Gemini AI feedback fetch error: $e');
       if (mounted) {
         setState(() {
-          _aiFeedback = BreathingFeedback(
-            headline: '${widget.title} 세션을 완주했어요.',
-            summaryText: '${widget.durationString} 동안 ${widget.cycleCount}번의 호흡을 마쳤어요.',
-            feedbackText: '${widget.title}은 긴장을 천천히 가라앉히는 데 효과적인 리듬으로 알려져 있어요. 이번 호흡으로 마음의 흐름을 한 번 더 따뜻하게 다듬은 셈이에요.',
-            todaysQuote: '깊은 숨을 내쉴 때마다 마음에 쌓인 부담은 아득히 멀어집니다.',
-          );
+          _aiFeedback = null;
+          _aiErrorMessage = '현재 AI 피드백을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.';
           _isLoadingFeedback = false;
         });
       }
@@ -672,7 +670,7 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
 
   /// 5. AI Analysis Container Card (Gemini AI 피드백 실시간 연동)
   Widget _buildAiAnalysisCard() {
-    if (_isLoadingFeedback || _aiFeedback == null) {
+    if (_isLoadingFeedback) {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
@@ -700,6 +698,27 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
               ),
             ),
           ],
+        ),
+      );
+    }
+
+    if (_aiErrorMessage != null || _aiFeedback == null) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+        decoration: BoxDecoration(
+          color: const Color(0xFF28292B),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          _aiErrorMessage ?? '현재 AI 분석을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.',
+          style: const TextStyle(
+            fontFamily: AppFonts.pretendard,
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+            color: AppColors.slateGray,
+            height: 1.5,
+          ),
         ),
       );
     }

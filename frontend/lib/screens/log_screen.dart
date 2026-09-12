@@ -1937,21 +1937,6 @@ class _LogScreenState extends State<LogScreen> {
   /// 4. AI 분석 · 현재 상태 카드
   Widget _buildAiAnalysisCard() {
     final headline = _aiReport?.headline.isNotEmpty == true
-        ? _aiReport!.headline
-        : '심박수가 높아지는 순간, 리추얼이 도움이 될 수 있어요';
-    final avgAnalysis = _aiReport?.avgBpmAnalysis.isNotEmpty == true
-        ? _aiReport!.avgBpmAnalysis
-        : '오늘의 평균 심박수는 $_avgHrStr BPM으로, 정상 범위 내에서 안정적인 상태를 유지하고 있어요.';
-    final maxAnalysis = _aiReport?.maxBpmAnalysis.isNotEmpty == true
-        ? _aiReport!.maxBpmAnalysis
-        : '다만, 최고 심박수가 $_maxHrStr BPM까지 상승한 순간이 있었어요. 이는 일시적인 긴장이나 집중, 혹은 다가오는 일정에 대한 준비 상태로 볼 수 있어요.';
-    final minAnalysis = _aiReport?.minBpmAnalysis.isNotEmpty == true
-        ? _aiReport!.minBpmAnalysis
-        : '최저 심박수는 $_minHrStr BPM으로 관찰되며, 이는 리추얼 이후 이완된 상태에서 나타나는 자연스러운 수치예요.';
-    final overallGuide = _aiReport?.overallGuide.isNotEmpty == true
-        ? _aiReport!.overallGuide
-        : '전반적인 컨디션은 양호한 편이며, 심박수가 높아지는 순간엔 짧은 리추얼로 미리 준비해보는 걸 추천드려요.';
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1996,6 +1981,25 @@ class _LogScreenState extends State<LogScreen> {
               ],
             ),
           )
+        else if (_aiReport == null)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+            decoration: BoxDecoration(
+              color: const Color(0xFF28292D),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Text(
+              '현재 AI 분석을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.',
+              style: TextStyle(
+                fontFamily: AppFonts.pretendard,
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: AppColors.slateGray,
+                height: 1.5,
+              ),
+            ),
+          )
         else
           Container(
             width: double.infinity,
@@ -2009,7 +2013,7 @@ class _LogScreenState extends State<LogScreen> {
               children: [
                 // Header title
                 Text(
-                  headline,
+                  _aiReport!.headline,
                   style: const TextStyle(
                     fontFamily: AppFonts.pretendard,
                     fontSize: 15,
@@ -2022,7 +2026,7 @@ class _LogScreenState extends State<LogScreen> {
 
                 // Dynamic Gemini AI Analysis Sections
                 Text(
-                  '$avgAnalysis\n\n$maxAnalysis\n\n$minAnalysis\n\n$overallGuide',
+                  '${_aiReport!.avgBpmAnalysis}\n\n${_aiReport!.maxBpmAnalysis}\n\n${_aiReport!.minBpmAnalysis}\n\n${_aiReport!.overallGuide}',
                   style: const TextStyle(
                     fontFamily: AppFonts.pretendard,
                     fontSize: 14,
