@@ -22,6 +22,7 @@ model User {
   measurements  Measurement[]
   breathingLogs BreathingLog[]
   schedules     Schedule[]
+  aiReports     AiReport[]
 }
 
 // 2. Measurement Model (PPG 생체 측정 내역)
@@ -60,5 +61,19 @@ model Schedule {
   startTime      DateTime
   endTime        DateTime
   syncedToGoogle Boolean  @default(false)
+  createdAt      DateTime @default(now())
+}
+
+// 5. AiReport Model (Gemini AI 주간/실시간 보고서 저장)
+model AiReport {
+  id             String   @id @default(uuid())
+  userId         String?
+  user           User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  weekStartDate  String   // "YYYY-MM-DD"
+  headline       String
+  avgBpmAnalysis String
+  maxBpmAnalysis String
+  minBpmAnalysis String
+  overallGuide   String
   createdAt      DateTime @default(now())
 }
