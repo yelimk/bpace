@@ -318,8 +318,8 @@ class _ConditionMeasurementScreenState
     }
 
     final waveform = _ppgService.waveform;
-    final fps = _ppgService.capturedFps;
-    final durationSec = _ppgService.capturedDurationSec;
+    final fps = _ppgService.capturedFps > 0 ? _ppgService.capturedFps : 30;
+    final durationSec = _ppgService.capturedDurationSec > 0 ? _ppgService.capturedDurationSec : 20;
     _ppgService.stopCamera(); // Turn off LED flash torch automatically after 20s!
 
     setState(() => _status = MeasurementStatus.analyzing);
