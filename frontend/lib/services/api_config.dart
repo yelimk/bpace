@@ -15,7 +15,7 @@ class ApiConfig {
 
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://breath-care-production.up.railway.app',
+    defaultValue: 'https://bpace.onrender.com',
   );
 
   /// Signal upload carries ~1800 samples, so it needs more room than a plain
