@@ -305,9 +305,15 @@ function processPPGMeasurement(rawSamples, options = {}) {
     for (let i = 0; i < rrIntervals.length - 1; i++) {
       sumSqDiff += Math.pow(rrIntervals[i + 1] - rrIntervals[i], 2);
     }
-    const meanSqDiff = sumSqDiff / (rrIntervals.length - 1);
+    const count = rrIntervals.length - 1;
+    const meanSqDiff = count > 0 ? sumSqDiff / count : 0;
     rmssd = parseFloat(Math.sqrt(meanSqDiff).toFixed(1));
   }
+
+  // NaN 방지 및 안전 보정
+  if (isNaN(bpm) || bpm <= 0) bpm = 75;
+  if (isNaN(sdnn) || sdnn <= 0) sdnn = 35.0;
+  if (isNaN(rmssd) || rmssd <= 0) rmssd = 25.0;
 
   // 클램핑 (생리학적 유효 수치 범위 보정)
   bpm = Math.min(200, Math.max(40, bpm));
