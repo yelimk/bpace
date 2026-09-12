@@ -322,12 +322,6 @@ class _ConditionMeasurementScreenState
     final durationSec = _ppgService.capturedDurationSec;
     _ppgService.stopCamera(); // Turn off LED flash torch automatically after 20s!
 
-    if (kIsWeb) {
-      // 웹(크롬) 시뮬레이션: 5대 카테고리 중 하나가 랜덤으로 반환되도록 설정!
-      _applyResult(PpgMeasurementResult.randomSample());
-      return;
-    }
-
     setState(() => _status = MeasurementStatus.analyzing);
 
     try {
@@ -346,20 +340,83 @@ class _ConditionMeasurementScreenState
 
       if (!mounted) return;
       _applyResult(PpgMeasurementResult.fromServer(
-        hr: (measurement.hr != null && measurement.hr! > 0) ? measurement.hr!.toDouble() : _ppgService.computeResults().bpm.toDouble(),
-        hrv: (measurement.hrv != null && measurement.hrv! > 0) ? measurement.hrv!.toDouble() : _ppgService.computeResults().hrvSdnnMs,
+        hr: (measurement.hr != null && measurement.hr! > 0) ? measurement.hr!.toDouble() : 75.0,
+        hrv: (measurement.hrv != null && measurement.hrv! > 0) ? measurement.hrv!.toDouble() : 25.0,
         conditionScore: measurement.conditionScore,
         quality: 'GOOD',
       ));
     } catch (e) {
       debugPrint('====================================================');
-      debugPrint('[PPG_FALLBACK_TRIGGERED] Backend failed or offline: $e');
+      debugPrint('[PPG_SERVER_REQUIRED_FAILED] Backend server analysis failed: $e');
       debugPrint('====================================================');
       if (!mounted) return;
-      // 백엔드 미연결 시 실측 수치로 100% 안전 결과 진입
-      final computed = _ppgService.computeResults();
-      _applyResult(computed);
+      // 오프라인 백업 계산을 완전히 제거하고, 무조건 서버 필수 안내 및 재시도 다이얼로그 표시
+      _showServerRequiredErrorDialog();
     }
+  }
+
+  void _showServerRequiredErrorDialog() {
+    if (!mounted) return;
+    setState(() => _status = MeasurementStatus.waiting);
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF28292D),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.wifi_off_rounded, color: Colors.orangeAccent, size: 24),
+            SizedBox(width: 8),
+            Text(
+              '서버 연동 필요',
+              style: TextStyle(
+                fontFamily: AppFonts.pretendard,
+                fontSize: 18,
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        content: const Text(
+          'BPACE 생체 측정 분석은 백엔드 서버 연동이 필수입니다.\nWi-Fi 또는 데이터 연결 상태를 확인하신 후 다시 시도해 주세요.',
+          style: TextStyle(
+            fontFamily: AppFonts.pretendard,
+            fontSize: 14,
+            color: Color(0xFFACAEB3),
+            height: 1.5,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop(); // Exit measurement screen
+            },
+            child: const Text(
+              '취소',
+              style: TextStyle(color: Colors.grey, fontFamily: AppFonts.pretendard),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.lightMint,
+              foregroundColor: AppColors.darkBg,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+              _setCompletedState(); // Retry server measurement submit
+            },
+            child: const Text(
+              '재시도',
+              style: TextStyle(fontFamily: AppFonts.pretendard, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _applyResult(PpgMeasurementResult result) {
