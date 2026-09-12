@@ -1936,7 +1936,6 @@ class _LogScreenState extends State<LogScreen> {
 
   /// 4. AI 분석 · 현재 상태 카드
   Widget _buildAiAnalysisCard() {
-    final headline = _aiReport?.headline.isNotEmpty == true
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
