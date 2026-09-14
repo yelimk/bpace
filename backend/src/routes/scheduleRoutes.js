@@ -18,7 +18,4 @@ router.put('/:id', optionalAuthMiddleware, scheduleController.updateSchedule);
 // DELETE /api/schedules/:id - 일정 삭제
 router.delete('/:id', optionalAuthMiddleware, scheduleController.deleteSchedule);
 
-// POST /api/schedules/sync - 구글 캘린더 동기화 스텁
-router.post('/sync', optionalAuthMiddleware, scheduleController.syncGoogleCalendar);
-
 module.exports = router;

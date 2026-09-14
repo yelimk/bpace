@@ -204,22 +204,10 @@ async function deleteSchedule(req, res) {
   }
 }
 
-/**
- * POST /api/schedules/sync
- * 구글 캘린더 동기화 스텁
- */
-async function syncGoogleCalendar(req, res) {
-  return sendSuccess(res, {
-    syncedCount: 0,
-    message: 'Google Calendar OAuth sync stub ready'
-  });
-}
-
 module.exports = {
   createSchedule,
   getSchedules,
   completeSchedule,
   updateSchedule,
-  deleteSchedule,
-  syncGoogleCalendar
+  deleteSchedule
 };
