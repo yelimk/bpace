@@ -145,14 +145,16 @@ class _AddScheduleModalState extends State<AddScheduleModal> {
       return;
     }
 
-    if (!ApiClient.instance.isLoggedIn) {
-      _showError('일정을 저장하려면 로그인이 필요해요.');
-      return;
-    }
+    setState(() => _isSaving = true);
+
+    final category = _categories.isNotEmpty
+        ? _categories[_selectedCategoryIndex.clamp(0, _categories.length - 1)]
+        : '일반';
 
     final scheduleData = {
+      'id': widget.initialSchedule?['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
       'title': title,
-      'category': _categories[_selectedCategoryIndex],
+      'category': category,
       'date': _selectedDate,
       'time': _formattedTimeString,
       'isCompleted': widget.initialSchedule?['isCompleted'] ?? false,
@@ -164,33 +166,22 @@ class _AddScheduleModalState extends State<AddScheduleModal> {
       widget.onScheduleAdded!(scheduleData);
     }
 
-    final category = _categories[_selectedCategoryIndex];
-    final mapped = EventType.fromCategory(category);
+    if (ApiClient.instance.isLoggedIn) {
+      try {
+        final mapped = EventType.fromCategory(category);
+        await CalendarService.instance.create(
+          title: title,
+          eventType: mapped.type,
+          startAt: _startAt,
+          customCategory: mapped.custom,
+        );
+      } catch (_) {
+        // Network/server errors do not prevent local schedule creation
+      }
+    }
 
-    setState(() => _isSaving = true);
-    try {
-      final saved = await CalendarService.instance.create(
-        title: title,
-        eventType: mapped.type,
-        startAt: _startAt,
-        customCategory: mapped.custom,
-      );
-
-      if (!mounted) return;
-      widget.onScheduleAdded?.call({
-        'id': saved.id,
-        'title': saved.title,
-        // Prefer the server's label: it resolves custom categories for us.
-        'category': saved.displayCategory ?? category,
-        'date': DateTime(saved.startAt.year, saved.startAt.month, saved.startAt.day),
-        'time': _formatTime(TimeOfDay.fromDateTime(saved.startAt)),
-        'isCompleted': false,
-      });
+    if (mounted) {
       Navigator.of(context).pop();
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      setState(() => _isSaving = false);
-      _showError(e.message);
     }
   }
 
@@ -211,6 +202,64 @@ class _AddScheduleModalState extends State<AddScheduleModal> {
         backgroundColor: AppColors.coralRed,
         duration: const Duration(seconds: 2),
       ),
+    );
+  }
+
+  void _confirmDeleteCategory(int index) {
+    if (_categories.length <= 1) {
+      _showError('최소 하나의 카테고리는 필요합니다.');
+      return;
+    }
+
+    final categoryName = _categories[index];
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: AppColors.darkCharcoal,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text(
+            '카테고리 삭제',
+            style: TextStyle(
+              fontFamily: AppFonts.pretendard,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.white,
+            ),
+          ),
+          content: Text(
+            "'$categoryName' 카테고리를 삭제하시겠습니까?",
+            style: const TextStyle(
+              fontFamily: AppFonts.pretendard,
+              fontSize: 14,
+              color: AppColors.lightGray,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('취소', style: TextStyle(color: AppColors.slateGray)),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                setState(() {
+                  _categories.removeAt(index);
+                  if (_selectedCategoryIndex >= _categories.length) {
+                    _selectedCategoryIndex = _categories.length - 1;
+                  } else if (_selectedCategoryIndex == index) {
+                    _selectedCategoryIndex = 0;
+                  } else if (_selectedCategoryIndex > index) {
+                    _selectedCategoryIndex--;
+                  }
+                });
+              },
+              child: const Text('삭제', style: TextStyle(color: AppColors.coralRed)),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -520,6 +569,7 @@ class _AddScheduleModalState extends State<AddScheduleModal> {
                     _selectedCategoryIndex = index;
                   });
                 },
+                onLongPress: () => _confirmDeleteCategory(index),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
