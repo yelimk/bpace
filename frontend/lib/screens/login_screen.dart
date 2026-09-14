@@ -24,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
   /// Guards against a second tap while the request is in flight. Without it a
   /// double tap creates two logins and two device registrations.
   bool _isSubmitting = false;
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -57,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     if (!_emailRegExp.hasMatch(email)) {
-      _showError('존재하지 않는 계정이거나 비밀번호가 일치하지 않습니다.');
+      _showError('유효한 이메일 형식을 입력해 주세요.');
       return;
     }
 
@@ -70,8 +71,6 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await AuthService.instance.login(email: email, password: password);
       if (!mounted) return;
-      // Replace rather than pop: the user came from onboarding or a guest
-      // flow, and going "back" to those from a signed-in home makes no sense.
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const HomeScreen()),
         (route) => false,
@@ -79,9 +78,8 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.of(context).push(
         MaterialPageRoute(builder: (context) => const MyPageScreen()),
       );
-    } on ApiException catch (_) {
-      // Show immediate cut-off message if account does not exist or password is wrong
-      _showError('존재하지 않는 계정이거나 비밀번호가 일치하지 않습니다.');
+    } on ApiException catch (e) {
+      _showError(e.message);
     } catch (_) {
       _showError('존재하지 않는 계정이거나 비밀번호가 일치하지 않습니다.');
     } finally {
@@ -151,7 +149,19 @@ class _LoginScreenState extends State<LoginScreen> {
                         controller: _passwordController,
                         hintText: '비밀번호',
                         icon: Icons.lock_outline_rounded,
-                        obscureText: true,
+                        obscureText: _obscurePassword,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                            color: const Color(0xFF8E9198),
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            setState(() => _obscurePassword = !_obscurePassword);
+                          },
+                        ),
                       ),
                       const SizedBox(height: 32),
 
@@ -235,14 +245,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 14),
 
-                      // 8. Google Social Login Pill Button (Google로 시작하기 - Tightly grouped)
+                      // 8. Google Social Login Pill Button (Google로 계속하기 - Tightly grouped)
                       _buildSocialPillButton(
                         icon: Image.asset(
                           'assets/images/ic_google.png',
                           width: 22,
                           height: 22,
                         ),
-                        text: 'Google로 시작하기',
+                        text: 'Google로 계속하기',
                         onTap: () {
                           _showError('구글 계정 연동 기능은 현재 준비 중입니다.');
                         },
@@ -298,6 +308,7 @@ class _LoginScreenState extends State<LoginScreen> {
     required String hintText,
     required IconData icon,
     bool obscureText = false,
+    Widget? suffixIcon,
     TextInputType keyboardType = TextInputType.text,
   }) {
     return Container(
@@ -331,6 +342,12 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           prefixIconConstraints: const BoxConstraints(minWidth: 56),
+          suffixIcon: suffixIcon != null
+              ? Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: suffixIcon,
+                )
+              : null,
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 18),
         ),
