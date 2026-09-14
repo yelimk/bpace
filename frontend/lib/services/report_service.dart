@@ -157,6 +157,7 @@ class ReportService {
     required int durationSeconds,
     required int cycleCount,
     int conditionScore = 80,
+    String? scheduleTitle,
   }) async {
     final data = await ApiClient.instance.post(
       '/api/reports/feedback',
@@ -165,6 +166,8 @@ class ReportService {
         'durationSeconds': durationSeconds,
         'cycleCount': cycleCount,
         'conditionScore': conditionScore,
+        if (scheduleTitle != null && scheduleTitle.trim().isNotEmpty)
+          'scheduleTitle': scheduleTitle.trim(),
       },
       timeout: ApiConfig.reportTimeout,
     );

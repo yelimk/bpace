@@ -53,8 +53,17 @@ function buildSlotAPrompt({ avgBpm, maxBpm, minBpm, hrvSdnnMs, conditionScore })
  * @param {string} params.durationString 수행 시간 (예: "0분 1초" 또는 "3분 0초")
  * @param {number} params.cycleCount 완주 회수 (예: 1)
  * @param {number} [params.conditionScore] 측정 컨디션 점수
+ * @param {string} [params.scheduleTitle] 연관된 일정 제목 (예: "전공 세미나 발표", "졸업논문 심사")
  */
-function buildSlotBPrompt({ routineName, durationString, cycleCount, conditionScore = 80 }) {
+function buildSlotBPrompt({ routineName, durationString, cycleCount, conditionScore = 80, scheduleTitle }) {
+  const scheduleContextInstruction = scheduleTitle && scheduleTitle.trim().isNotEmpty !== false
+    ? `- 연관 일정: "${scheduleTitle}" (사용자가 "${scheduleTitle}" 일정을 준비하기 위해 수행한 호흡입니다.)\n`
+    : '';
+
+  const scheduleRule = scheduleTitle && scheduleTitle.trim().isNotEmpty !== false
+    ? `4. 특히 사용자가 준비 중인 "${scheduleTitle}" 일정을 고려하여, 무대 긴장감 완화, 발표/시험/면접 대비 자신감 및 마인드셋을 격려하는 문장을 헤드라인과 피드백, 오늘의 한마디에 자연스럽게 녹여내세요.\n`
+    : '';
+
   return `
 당신은 사용자의 호흡 세션 완주를 격려하고 심신의 평온을 전하는 다정한 웰니스 코치입니다.
 
@@ -63,16 +72,16 @@ function buildSlotBPrompt({ routineName, durationString, cycleCount, conditionSc
 - 수행 시간: ${durationString}
 - 완주 사이클 수: ${cycleCount}회
 - 측정 컨디션 점수: ${conditionScore}점
-
+${scheduleContextInstruction}
 [작성 규칙]
 1. 완주를 축하하고 호흡의 긍정적 효과(자율신경계 조절, 긴장 이완)를 다정하게 설명하세요.
 2. todaysQuote 필드에는 사용자의 마음을 따뜻하게 어루만져주는 감성적인 마인드풀니스 한마디(Mindful Quote)를 작성하세요.
-3. 아래 지정된 반환 JSON 스키마만을 엄격하게 준수하여 응답하세요 (마크다운 코드블록 제외, 오직 pure JSON만 반환):
-
+3. 아래 지정된 반환 JSON 스키마만을 엄격하게 준수하여 응답하세요 (마크다운 코드블록 제외, 오직 pure JSON만 반환).
+${scheduleRule}
 {
-  "headline": "한 줄 완주 축하 헤드라인 (예: 3분간의 호흡으로 심신의 호수처럼 맑은 정적을 되찾았어요)",
+  "headline": "한 줄 완주 축하 헤드라인 (예: ${scheduleTitle ? `${scheduleTitle} 전, 호흡으로 완벽한 마인드셋을 갖췄어요` : '3분간의 호흡으로 심신의 호수처럼 맑은 정적을 되찾았어요'})",
   "summaryText": "호흡 요약 문구 (예: ${durationString} 동안 ${cycleCount}번의 호흡을 마쳤어요.)",
-  "feedbackText": "자세한 호흡 효과 피드백 문구 (예: ${routineName}은 긴장을 천천히 가라앉히는 데 효과적인 리듬으로 알려져 있어요. 시작 전 컨디션이 ${conditionScore}점으로 안정적인 편이었는데, 이번 Ritual로 그 흐름을 한 번 더 다듬은 셈이에요.)",
+  "feedbackText": "자세한 호흡 효과 피드백 문구 (예: ${routineName}은 긴장을 천천히 가라앉히는 데 효과적인 리듬이에요.${scheduleTitle ? ` ${scheduleTitle} 직전 호흡으로 심박수가 안정되고 이완 상태를 달성하셨어요.` : ''})",
   "todaysQuote": "오늘의 감성 마인드풀니스 한마디 (예: 숨을 내쉬는 것은 지나간 일을 내려놓고, 지금의 나에게 가장 편안한 자리를 내어주는 일입니다.)"
 }
 `;

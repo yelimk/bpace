@@ -13,6 +13,7 @@ import 'home_screen.dart';
 import 'condition_measurement_screen.dart';
 import 'my_page_screen.dart';
 import 'add_schedule_modal.dart';
+import 'breathing_completion_screen.dart';
 import '../utils/schedule_storage_service.dart';
 import '../services/report_service.dart';
 
@@ -1469,22 +1470,70 @@ class _LogScreenState extends State<LogScreen> {
                 const SizedBox(width: 12),
               ],
 
-              Container(
-                width: 38,
-                height: 38,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF1F2023),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.arrow_forward_rounded,
-                  color: isCompleted ? Colors.white : const Color(0xFF555860),
-                  size: 18,
+              GestureDetector(
+                onTap: isCompleted ? () => _openCompletedRitualFeedback(schedule) : null,
+                child: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF1F2023),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.arrow_forward_rounded,
+                    color: isCompleted ? Colors.white : const Color(0xFF555860),
+                    size: 18,
+                  ),
                 ),
               ),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  void _openCompletedRitualFeedback(Map<String, dynamic> schedule) {
+    final title = schedule['title'] as String? ?? '맞춤 호흡';
+
+    String routineName = schedule['routineName'] as String? ?? '4-7-8 딥이완 호흡';
+    String durationString = schedule['durationString'] as String? ?? '05:04';
+    int cycleCount = schedule['cycleCount'] as int? ?? 4;
+    String bgImagePath = schedule['bgImagePath'] as String? ?? 'assets/images/bg_breath_478.png';
+    String? aiHeadline = schedule['aiHeadline'] as String?;
+    String? aiQuote = schedule['aiQuote'] as String?;
+    String? aiFeedbackText = schedule['aiFeedbackText'] as String?;
+
+    if (title.contains('졸업논문') || title.contains('심사')) {
+      routineName = schedule['routineName'] as String? ?? '4-6 릴렉스 호흡';
+      durationString = schedule['durationString'] as String? ?? '04:30';
+      cycleCount = schedule['cycleCount'] as int? ?? 3;
+      bgImagePath = schedule['bgImagePath'] as String? ?? 'assets/images/bg_breath_box.png';
+      aiHeadline ??= '졸업논문 심사 전, 긴장 해소와 또렷한 집중력을 완벽히 제어했어요';
+      aiQuote ??= '"고요한 호흡 속에 선명해지는 집중의 순간, 심사도 차분하고 단단하게 잘 해낼 수 있습니다."';
+      aiFeedbackText ??= '중요한 논문 심사를 앞두고 4-6 릴렉스 호흡을 완주하셨네요. 심사 전 불필요한 떨림은 날숨 사이로 정돈되고, 또렷한 인지 사고와 이완 상태가 형성되었습니다.';
+    } else if (title.contains('발표') || title.contains('세미나')) {
+      routineName = schedule['routineName'] as String? ?? '4-7-8 딥이완 호흡';
+      durationString = schedule['durationString'] as String? ?? '05:04';
+      cycleCount = schedule['cycleCount'] as int? ?? 4;
+      bgImagePath = schedule['bgImagePath'] as String? ?? 'assets/images/bg_breath_478.png';
+      aiHeadline ??= '전공 세미나 발표 전, 5분간의 4-7-8 호흡으로 완벽한 마인드셋을 갖췄어요';
+      aiQuote ??= '"발표 전 깊은 숨을 내쉴 때마다 마음에 쌓인 부담은 아득히 멀어집니다."';
+      aiFeedbackText ??= '발표 직전 4-7-8 딥이완 호흡을 완주하여 심박수가 82 BPM으로 안정되고, 과도한 교감신경 긴장감과 손 떨림이 효과적으로 진정되었습니다.';
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => BreathingCompletionScreen(
+          title: routineName,
+          bgImagePath: bgImagePath,
+          durationString: durationString,
+          cycleCount: cycleCount,
+          initialHeadline: aiHeadline,
+          initialQuote: aiQuote,
+          initialFeedbackText: aiFeedbackText,
+          isAlreadySaved: true,
+        ),
       ),
     );
   }

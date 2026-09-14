@@ -143,14 +143,15 @@ async function generateRealtimeReport(req, res) {
  */
 async function generateBreathingFeedback(req, res) {
   try {
-    const { routineName = "4-6 릴렉스 호흡", durationSeconds = 180, cycleCount = 3, conditionScore = 80 } = req.body;
+    const { routineName = "4-6 릴렉스 호흡", durationSeconds = 180, cycleCount = 3, conditionScore = 80, scheduleTitle } = req.body;
     const durationString = formatDuration(durationSeconds);
 
     const promptData = {
       routineName,
       durationString,
       cycleCount,
-      conditionScore
+      conditionScore,
+      scheduleTitle
     };
 
     const promptText = buildSlotBPrompt(promptData);
