@@ -71,10 +71,20 @@ async function signup(req, res) {
       }
     });
 
+    // 회원가입 즉시 자동 로그인 토큰 발급
+    const accessToken = jwt.sign(
+      { userId: user.id, email: user.email },
+      JWT_SECRET,
+      { expiresIn: '30d' }
+    );
+
     return sendSuccess(res, {
-      id: user.id,
-      email: user.email,
-      nickname: user.name
+      accessToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        nickname: user.name
+      }
     }, 201);
   } catch (error) {
     console.error('회원가입 처리 중 오류:', error);

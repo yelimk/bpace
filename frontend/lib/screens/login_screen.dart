@@ -5,7 +5,6 @@ import '../theme/app_text_styles.dart';
 import '../utils/responsive.dart';
 import '../services/api_exception.dart';
 import '../services/auth_service.dart';
-import 'home_screen.dart';
 import 'my_page_screen.dart';
 import 'signup_screen.dart';
 
@@ -72,11 +71,8 @@ class _LoginScreenState extends State<LoginScreen> {
       await AuthService.instance.login(email: email, password: password);
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-        (route) => false,
-      );
-      Navigator.of(context).push(
         MaterialPageRoute(builder: (context) => const MyPageScreen()),
+        (route) => false,
       );
     } on ApiException catch (e) {
       _showError(e.message);

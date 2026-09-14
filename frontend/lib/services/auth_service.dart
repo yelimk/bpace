@@ -27,8 +27,15 @@ class AuthService {
       'password': password,
       if (nickname != null && nickname.trim().isNotEmpty)
         'nickname': nickname.trim(),
-    });
-    return User.fromJson(data as Map<String, dynamic>);
+    }) as Map<String, dynamic>;
+
+    final user = User.fromJson(data['user'] as Map<String, dynamic>);
+    final token = data['accessToken'] as String?;
+    if (token != null) {
+      await _client.setToken(token, user: user);
+      await PushService.instance.register();
+    }
+    return user;
   }
 
   /// Throws `INVALID_CREDENTIALS` when either the email or the password is

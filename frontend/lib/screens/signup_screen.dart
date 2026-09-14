@@ -5,7 +5,6 @@ import '../theme/app_text_styles.dart';
 import '../utils/responsive.dart';
 import '../services/api_exception.dart';
 import '../services/auth_service.dart';
-import 'home_screen.dart';
 import 'my_page_screen.dart';
 
 /// Sign Up Screen (회원가입 페이지 matching screenshot)
@@ -110,9 +109,6 @@ class _SignupScreenState extends State<SignupScreen> {
     try {
       await AuthService.instance
           .signup(email: email, password: password, nickname: nickname);
-      // Signup does not return a token, so log in with the same credentials
-      // rather than making the user type them a second time.
-      await AuthService.instance.login(email: email, password: password);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -123,11 +119,8 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
       );
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-        (route) => false,
-      );
-      Navigator.of(context).push(
         MaterialPageRoute(builder: (context) => const MyPageScreen()),
+        (route) => false,
       );
     } on ApiException catch (e) {
       // DUPLICATE_EMAIL lands here with the server's own wording.

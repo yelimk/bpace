@@ -9,6 +9,7 @@ import '../models/user.dart';
 import '../services/api_client.dart';
 import '../services/auth_service.dart';
 import '../services/push_service.dart';
+import 'home_screen.dart';
 import 'login_screen.dart';
 import 'ritual_history_screen.dart';
 
@@ -176,7 +177,15 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () {
+                      if (Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                      } else {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (context) => const HomeScreen()),
+                        );
+                      }
+                    },
                     icon: const Icon(
                       Icons.arrow_back_ios_new_rounded,
                       color: AppColors.white,
