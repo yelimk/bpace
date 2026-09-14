@@ -241,6 +241,26 @@ class _BreathingExerciseScreenState extends State<BreathingExerciseScreen>
     });
   }
 
+  String get _resolvedBgImagePath {
+    if (widget.bgImagePath != 'assets/images/bg_breath_box_4444.png') {
+      return widget.bgImagePath;
+    }
+    if (widget.routineModel != null) {
+      return widget.routineModel!.bgImagePath;
+    }
+    final t = widget.title;
+    if (t.contains('4-7-8') || t.contains('이완')) {
+      return 'assets/images/bg_breath_478.png';
+    } else if (t.contains('한숨') || t.contains('긴급')) {
+      return 'assets/images/bg_breath_sigh.png';
+    } else if (t.contains('각성') || t.contains('4-1-2-1') || t.contains('에너지')) {
+      return 'assets/images/bg_breath_awakening.png';
+    } else if (t.contains('공진') || t.contains('5-5') || t.contains('5.5') || t.contains('회복') || t.contains('밸런스')) {
+      return 'assets/images/bg_breath_semi_box.png';
+    }
+    return widget.bgImagePath;
+  }
+
   void _finishExercise() {
     if (widget.targetScheduleId != null && widget.targetScheduleId!.isNotEmpty) {
       ScheduleStorageService.completeSchedule(widget.targetScheduleId);
@@ -255,7 +275,7 @@ class _BreathingExerciseScreenState extends State<BreathingExerciseScreen>
       MaterialPageRoute(
         builder: (context) => BreathingCompletionScreen(
           title: widget.title,
-          bgImagePath: widget.bgImagePath,
+          bgImagePath: _resolvedBgImagePath,
           durationString: _formattedTime,
           cycleCount: currentCycle,
           hrvChange: '$averageHrvBpmChange bpm',
@@ -550,7 +570,7 @@ class _BreathingExerciseScreenState extends State<BreathingExerciseScreen>
         children: [
           // Background Image
           Image.asset(
-            widget.bgImagePath,
+            _resolvedBgImagePath,
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
               return Container(

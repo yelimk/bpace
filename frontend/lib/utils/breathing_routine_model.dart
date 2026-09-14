@@ -70,6 +70,22 @@ class BreathingRoutineModel {
     }
   }
 
+  /// 배경 이미지 경로 매핑
+  String get bgImagePath {
+    switch (type) {
+      case BreathingRoutineType.physiologicalSigh:
+        return 'assets/images/bg_breath_sigh.png';
+      case BreathingRoutineType.calm478:
+        return 'assets/images/bg_breath_478.png';
+      case BreathingRoutineType.box4444:
+        return 'assets/images/bg_breath_box_4444.png';
+      case BreathingRoutineType.resonance55:
+        return 'assets/images/bg_breath_semi_box.png';
+      case BreathingRoutineType.awakening4121:
+        return 'assets/images/bg_breath_awakening.png';
+    }
+  }
+
   /// 평균 심박수(BPM) 및 심박변이도(HRV ms) 기반 5대 카테고리 자동 분기 매핑
   factory BreathingRoutineModel.fromMeasurement({
     required int bpm,
