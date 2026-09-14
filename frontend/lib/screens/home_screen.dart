@@ -43,6 +43,13 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadHomeSchedules();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadSavedMeasurementData();
+    _loadHomeSchedules();
+  }
+
   Future<void> _loadHomeSchedules() async {
     final loaded = await ScheduleStorageService.loadSchedules();
     final now = DateTime.now();
@@ -65,22 +72,22 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadSavedMeasurementData() async {
-    final latestRes = PpgSensorService.latestResult;
     final prefs = await SharedPreferences.getInstance();
     final savedScore = prefs.getInt('latest_condition_score');
     final savedBpm = prefs.getInt('latest_bpm');
     final savedHrv = prefs.getInt('latest_hrv');
+    final latestRes = PpgSensorService.latestResult;
 
     if (mounted) {
       setState(() {
-        if (latestRes != null) {
-          conditionScore = latestRes.conditionScore;
-          heartRate = latestRes.bpm;
-          hrvValue = latestRes.hrvSdnnMs.round();
-        } else if (savedScore != null) {
+        if (savedScore != null) {
           conditionScore = savedScore;
           if (savedBpm != null) heartRate = savedBpm;
           if (savedHrv != null) hrvValue = savedHrv;
+        } else if (latestRes != null) {
+          conditionScore = latestRes.conditionScore;
+          heartRate = latestRes.bpm;
+          hrvValue = latestRes.hrvSdnnMs.round();
         }
       });
     }
