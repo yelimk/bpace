@@ -888,7 +888,9 @@ class _MeasurementResultScreenState extends State<MeasurementResultScreen> {
                         initialInhaleSec: activeResult.measuredInhaleSec,
                         initialExhaleSec: activeResult.measuredExhaleSec,
                         isAdaptiveRamp: true,
-                        targetScheduleId: widget.targetScheduleId,
+                        targetScheduleId: widget.targetScheduleId ??
+                            (_upcomingSchedule?['id'] as String?) ??
+                            (_upcomingSchedule?['title'] as String?),
                       ),
                     ),
                   );

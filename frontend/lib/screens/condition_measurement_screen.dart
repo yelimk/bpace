@@ -347,12 +347,16 @@ class _ConditionMeasurementScreenState
       debugPrint('====================================================');
 
       if (!mounted) return;
-      _applyResult(PpgMeasurementResult.fromServer(
-        hr: (measurement.hr != null && measurement.hr! > 0) ? measurement.hr!.toDouble() : 75.0,
-        hrv: (measurement.hrv != null && measurement.hrv! > 0) ? measurement.hrv!.toDouble() : 25.0,
-        conditionScore: measurement.conditionScore,
-        quality: 'GOOD',
-      ));
+      if (kIsWeb) {
+        _applyResult(PpgMeasurementResult.randomSample());
+      } else {
+        _applyResult(PpgMeasurementResult.fromServer(
+          hr: (measurement.hr != null && measurement.hr! > 0) ? measurement.hr!.toDouble() : 75.0,
+          hrv: (measurement.hrv != null && measurement.hrv! > 0) ? measurement.hrv!.toDouble() : 25.0,
+          conditionScore: measurement.conditionScore,
+          quality: 'GOOD',
+        ));
+      }
     } catch (e) {
       debugPrint('====================================================');
       debugPrint('[PPG_SERVER_REQUIRED_FAILED] Backend server analysis failed: $e');

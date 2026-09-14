@@ -7,6 +7,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../utils/responsive.dart';
 import '../utils/breathing_routine_model.dart';
+import '../utils/schedule_storage_service.dart';
 import 'breathing_completion_screen.dart';
 
 /// Guided Breathing Exercise Screen with Smooth Stable Cycle Animation & Adaptive Entrainment
@@ -241,6 +242,9 @@ class _BreathingExerciseScreenState extends State<BreathingExerciseScreen>
   }
 
   void _finishExercise() {
+    if (widget.targetScheduleId != null && widget.targetScheduleId!.isNotEmpty) {
+      ScheduleStorageService.completeSchedule(widget.targetScheduleId);
+    }
     _durationTimer?.cancel();
     _overlayTimer?.cancel();
     _cycleStopwatch.stop();

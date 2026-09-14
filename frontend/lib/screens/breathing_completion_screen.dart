@@ -91,6 +91,7 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
         routineName: widget.title,
         durationSeconds: durationSec,
         cycleCount: widget.cycleCount,
+        scheduleTitle: widget.targetScheduleId,
       );
       if (mounted) {
         setState(() {
