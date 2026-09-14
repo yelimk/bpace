@@ -92,6 +92,20 @@ class _MyPageScreenState extends State<MyPageScreen> {
     final minutes = storedMinutes ?? (326 + (savedJsonList.length * 5));
     final streak = storedStreak ?? 7;
 
+    if (_isLoggedIn) {
+      try {
+        final res = await ApiClient.instance.get('/api/auth/me');
+        if (res is Map<String, dynamic>) {
+          final user = User.fromJson(res);
+          ApiClient.instance.currentUser = user;
+          await prefs.setInt('user_id', user.id);
+          await prefs.setString('user_email', user.email);
+          if (user.nickname != null) await prefs.setString('user_nickname', user.nickname!);
+          if (user.photoUrl != null) await prefs.setString('user_photo_url', user.photoUrl!);
+        }
+      } catch (_) {}
+    }
+
     if (mounted) {
       setState(() {
         _weeklyRitualCount = count;
@@ -227,7 +241,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                       children: [
                         Text(
                           _isLoggedIn
-                              ? (ApiClient.instance.currentUser?.displayName ?? '구글 사용자')
+                              ? (ApiClient.instance.currentUser?.displayName ?? '사용자')
                               : 'GUEST',
                           style: const TextStyle(
                             fontFamily: AppFonts.pretendard,
@@ -239,7 +253,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                         const SizedBox(height: 4),
                         Text(
                           _isLoggedIn
-                              ? (ApiClient.instance.currentUser?.email ?? 'google@gmail.com')
+                              ? (ApiClient.instance.currentUser?.email ?? '')
                               : '로그인 / 회원가입하기 >',
                           style: const TextStyle(
                             fontFamily: AppFonts.pretendard,

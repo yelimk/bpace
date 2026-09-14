@@ -37,11 +37,19 @@ class ApiClient {
 
   bool get isLoggedIn => _accessToken != null;
 
-  /// Restores the saved token. Call once during app startup, before the first
-  /// screen decides whether to show login or home.
+  /// Restores the saved token and user info. Call once during app startup.
   Future<void> restoreSession() async {
     final prefs = await SharedPreferences.getInstance();
     _accessToken = prefs.getString(_tokenKey);
+    final email = prefs.getString('user_email');
+    if (email != null && email.isNotEmpty) {
+      currentUser = User(
+        id: prefs.getInt('user_id') ?? 1,
+        email: email,
+        nickname: prefs.getString('user_nickname'),
+        photoUrl: prefs.getString('user_photo_url'),
+      );
+    }
   }
 
   Future<void> setToken(String? token, {User? user}) async {
@@ -53,8 +61,22 @@ class ApiClient {
     if (token == null) {
       currentUser = null;
       await prefs.remove(_tokenKey);
+      await prefs.remove('user_id');
+      await prefs.remove('user_email');
+      await prefs.remove('user_nickname');
+      await prefs.remove('user_photo_url');
     } else {
       await prefs.setString(_tokenKey, token);
+      if (currentUser != null) {
+        await prefs.setInt('user_id', currentUser!.id);
+        await prefs.setString('user_email', currentUser!.email);
+        if (currentUser!.nickname != null) {
+          await prefs.setString('user_nickname', currentUser!.nickname!);
+        }
+        if (currentUser!.photoUrl != null) {
+          await prefs.setString('user_photo_url', currentUser!.photoUrl!);
+        }
+      }
     }
   }
 
