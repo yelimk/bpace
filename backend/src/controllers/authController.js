@@ -103,15 +103,15 @@ async function login(req, res) {
       where: { email: email.trim().toLowerCase() }
     });
 
-    // 단일 보안 차단 메시지 (존재하지 않는 계정이거나 비밀번호 불일치)
     if (!user || !user.passwordHash) {
-      return sendError(res, 'INVALID_CREDENTIALS', '존재하지 않는 계정이거나 비밀번호가 일치하지 않습니다.', 400);
+      return sendError(res, 'USER_NOT_FOUND', '가입되지 않은 이메일 주소입니다.', 400);
     }
 
-    // 비밀번호 검증
-    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    // 비밀번호 검증 (입력 양쪽 공백 제거 고려)
+    const isMatch = await bcrypt.compare(password, user.passwordHash) || 
+                    await bcrypt.compare(password.trim(), user.passwordHash);
     if (!isMatch) {
-      return sendError(res, 'INVALID_CREDENTIALS', '존재하지 않는 계정이거나 비밀번호가 일치하지 않습니다.', 400);
+      return sendError(res, 'PASSWORD_MISMATCH', '비밀번호가 일치하지 않습니다. 대소문자 및 오탈자를 확인해 주세요.', 400);
     }
 
     // JWT 발급 (30일 유효)
