@@ -74,6 +74,16 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
+    final lowerEmail = email.toLowerCase();
+    if (lowerEmail.endsWith('.ocm') ||
+        lowerEmail.endsWith('.con') ||
+        lowerEmail.endsWith('.cmo') ||
+        lowerEmail.endsWith('.gmai.com') ||
+        lowerEmail.endsWith('.nver.com')) {
+      _showError('이메일 도메인 주소(예: .com, .net)를 다시 확인해 주세요.');
+      return;
+    }
+
     if (password.isEmpty) {
       _showError('비밀번호를 입력해 주세요.');
       return;
@@ -81,6 +91,13 @@ class _SignupScreenState extends State<SignupScreen> {
 
     if (password.length < 8 || password.length > 64) {
       _showError('비밀번호는 8자 이상 64자 이하로 입력해 주세요.');
+      return;
+    }
+
+    final hasLetter = RegExp(r'[A-Za-z]').hasMatch(password);
+    final hasDigit = RegExp(r'\d').hasMatch(password);
+    if (!hasLetter || !hasDigit) {
+      _showError('비밀번호는 영문과 숫자를 모두 포함해야 합니다.');
       return;
     }
 
