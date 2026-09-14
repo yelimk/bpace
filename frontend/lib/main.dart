@@ -4,7 +4,7 @@ import 'theme/app_colors.dart';
 import 'theme/app_text_styles.dart';
 import 'screens/splash_screen.dart';
 import 'services/api_client.dart';
-import 'services/push_service.dart';
+import 'services/local_notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,9 +14,9 @@ void main() async {
     debugPrint('Session restore skipped: $e');
   }
   try {
-    await PushService.initialize();
+    await LocalNotificationService.instance.initialize();
   } catch (e) {
-    debugPrint('Push init skipped: $e');
+    debugPrint('Local notification init skipped: $e');
   }
   runApp(const BreathCareApp());
 }

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/local_notification_service.dart';
 
 class ScheduleStorageService {
   static const String _prefKey = 'saved_user_schedules_v2';
@@ -100,6 +101,7 @@ class ScheduleStorageService {
     current.add(newSchedule);
     _cachedSchedules = current;
     await _saveToPrefs();
+    _scheduleReminderIfValid(newSchedule);
   }
 
   /// Complete a schedule by title or ID (when breathing ritual is completed via schedule flow)
@@ -128,6 +130,7 @@ class ScheduleStorageService {
       if (current[i]['id'] == id || current[i]['title'] == updated['title']) {
         final map = Map<String, dynamic>.from(updated);
         current[i] = map;
+        _scheduleReminderIfValid(map);
         break;
       }
     }
@@ -141,6 +144,32 @@ class ScheduleStorageService {
     current.removeWhere((s) => s['id'] == id || s['title'] == id);
     _cachedSchedules = current;
     await _saveToPrefs();
+    LocalNotificationService.instance.cancelReminder(id);
+  }
+
+  static void _scheduleReminderIfValid(Map<String, dynamic> s) {
+    try {
+      final id = s['id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString();
+      final title = s['title'] as String? ?? '일정';
+      final dateRaw = s['date'];
+      final timeStr = s['time'] as String? ?? '오후 2:30';
+
+      DateTime? date;
+      if (dateRaw is DateTime) {
+        date = dateRaw;
+      } else if (dateRaw is String) {
+        date = DateTime.tryParse(dateRaw);
+      }
+
+      if (date != null) {
+        LocalNotificationService.instance.schedule30MinReminder(
+          id: id,
+          title: title,
+          scheduleDate: date,
+          timeStr: timeStr,
+        );
+      }
+    } catch (_) {}
   }
 
   static Future<void> _saveToPrefs() async {

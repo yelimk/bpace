@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/api_client.dart';
 import '../services/calendar_service.dart';
+import '../services/local_notification_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
@@ -164,6 +165,13 @@ class _AddScheduleModalState extends State<AddScheduleModal> {
     } else if (widget.onScheduleAdded != null) {
       widget.onScheduleAdded!(scheduleData);
     }
+
+    LocalNotificationService.instance.schedule30MinReminder(
+      id: scheduleData['id'] as String,
+      title: title,
+      scheduleDate: _selectedDate,
+      timeStr: _formattedTimeString,
+    );
 
     if (ApiClient.instance.isLoggedIn) {
       try {
