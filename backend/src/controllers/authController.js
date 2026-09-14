@@ -242,10 +242,6 @@ async function withdraw(req, res) {
   }
 }
 
-/**
- * GET /api/auth/me
- * 내 프로필 정보 조회
- */
 async function getMe(req, res) {
   return sendSuccess(res, {
     id: req.user.id,
@@ -256,11 +252,31 @@ async function getMe(req, res) {
   });
 }
 
+async function devResetUsers(req, res) {
+  try {
+    const { email } = req.body || {};
+    if (email) {
+      const deleted = await prisma.user.deleteMany({
+        where: { email: email.trim().toLowerCase() }
+      });
+      return sendSuccess(res, { count: deleted.count, message: `${email} 계정이 삭제되었습니다.` });
+    } else {
+      const deleted = await prisma.user.deleteMany({});
+      return sendSuccess(res, { count: deleted.count, message: '모든 회원 계정이 초기화되었습니다.' });
+    }
+  } catch (error) {
+    console.error('계정 초기화 오류:', error);
+    return sendError(res, 'SERVER_ERROR', error.message, 500);
+  }
+}
+
 module.exports = {
   signup,
   login,
   socialLogin,
   logout,
   withdraw,
-  getMe
+  getMe,
+  devResetUsers
 };
+
