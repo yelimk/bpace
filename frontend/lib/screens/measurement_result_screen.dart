@@ -6,7 +6,6 @@ import '../utils/responsive.dart';
 import '../utils/ppg_sensor_service.dart';
 import '../utils/breathing_routine_model.dart';
 import '../utils/schedule_storage_service.dart';
-import '../services/report_service.dart';
 import 'breathing_exercise_screen.dart';
 import 'log_screen.dart';
 
@@ -67,7 +66,8 @@ class _MeasurementResultScreenState extends State<MeasurementResultScreen> {
     if (hrvHistory.isNotEmpty) {
       final List<int> vals = [];
       for (final item in hrvHistory) {
-        final parts = item.split(':');
+        final payload = item.contains('|') ? item.split('|')[1] : item;
+        final parts = payload.split(':');
         if (parts.length >= 2) {
           final v = int.tryParse(parts[1]);
           if (v != null) vals.add(v);
@@ -92,16 +92,18 @@ class _MeasurementResultScreenState extends State<MeasurementResultScreen> {
     hrHistory.add(activeResult.bpm.toString());
     await prefs.setStringList('hr_history', hrHistory);
 
-    final weekday = DateTime.now().weekday;
+    final nowTime = DateTime.now();
+    final isoNow = nowTime.toIso8601String();
+    final weekday = nowTime.weekday;
     final hrVal = activeResult.bpm;
     final hrvVal = activeResult.hrvSdnnMs.round();
 
     final hrHistoryV2 = prefs.getStringList('hr_history_v2') ?? [];
-    hrHistoryV2.add('$weekday:$hrVal');
+    hrHistoryV2.add('$isoNow|$weekday:$hrVal');
     await prefs.setStringList('hr_history_v2', hrHistoryV2);
 
     final newHrvHistory = prefs.getStringList('hrv_history_v2') ?? [];
-    newHrvHistory.add('$weekday:$hrvVal');
+    newHrvHistory.add('$isoNow|$weekday:$hrvVal');
     await prefs.setStringList('hrv_history_v2', newHrvHistory);
 
     // 2. Load today's upcoming schedule closest to current time (irrespective of isCompleted)

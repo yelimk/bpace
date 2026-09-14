@@ -292,12 +292,28 @@ class _LogScreenState extends State<LogScreen> {
       }
     }
 
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final thisWeekMonday = today.subtract(Duration(days: today.weekday - 1));
+
     final hrListV2 = prefs.getStringList('hr_history_v2');
     if (hrListV2 != null && hrListV2.isNotEmpty) {
       final Map<int, List<int>> map = {};
       final List<int> allVals = [];
       for (final entry in hrListV2) {
-        final parts = entry.split(':');
+        DateTime? entryDate;
+        String payload = entry;
+        if (entry.contains('|')) {
+          final pipeParts = entry.split('|');
+          entryDate = DateTime.tryParse(pipeParts[0]);
+          payload = pipeParts[1];
+        }
+
+        if (entryDate != null && entryDate.isBefore(thisWeekMonday)) {
+          continue;
+        }
+
+        final parts = payload.split(':');
         if (parts.length == 2) {
           final w = int.tryParse(parts[0]);
           final v = int.tryParse(parts[1]);
@@ -320,7 +336,19 @@ class _LogScreenState extends State<LogScreen> {
       final Map<int, List<int>> map = {};
       final List<int> allVals = [];
       for (final entry in hrvList) {
-        final parts = entry.split(':');
+        DateTime? entryDate;
+        String payload = entry;
+        if (entry.contains('|')) {
+          final pipeParts = entry.split('|');
+          entryDate = DateTime.tryParse(pipeParts[0]);
+          payload = pipeParts[1];
+        }
+
+        if (entryDate != null && entryDate.isBefore(thisWeekMonday)) {
+          continue;
+        }
+
+        final parts = payload.split(':');
         if (parts.length == 2) {
           final w = int.tryParse(parts[0]);
           final v = int.tryParse(parts[1]);
@@ -2410,22 +2438,25 @@ class _HrLineChartPainter extends CustomPainter {
 
       canvas.drawPath(path, linePaint);
 
-      // Draw dots for each measurement point
-      for (final pt in points) {
-        canvas.drawCircle(
-          pt,
-          3.0,
-          Paint()..color = AppColors.lightMint,
-        );
-      }
+      // Draw dots: Today is big white circle (radius 5.0), other weekdays are small mint circles (radius 3.0)
+      for (final entry in pointEntries) {
+        final wIndex = entry.key;
+        final pt = entry.value;
 
-      // Point Dot on Last Highlight Point
-      final lastPoint = points.last;
-      canvas.drawCircle(
-        lastPoint,
-        5.0,
-        Paint()..color = AppColors.white,
-      );
+        if (wIndex == todayW) {
+          canvas.drawCircle(
+            pt,
+            5.0,
+            Paint()..color = AppColors.white,
+          );
+        } else {
+          canvas.drawCircle(
+            pt,
+            3.0,
+            Paint()..color = AppColors.lightMint,
+          );
+        }
+      }
     }
   }
 

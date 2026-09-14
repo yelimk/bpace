@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,7 +9,6 @@ import '../services/api_client.dart';
 import '../services/auth_service.dart';
 import '../services/push_service.dart';
 import 'login_screen.dart';
-import 'log_screen.dart';
 import 'ritual_history_screen.dart';
 
 class MyPageScreen extends StatefulWidget {
@@ -31,15 +31,59 @@ class _MyPageScreenState extends State<MyPageScreen> {
     _loadStats();
   }
 
+  DateTime _getThisWeekMonday() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    return today.subtract(Duration(days: today.weekday - 1));
+  }
+
+  DateTime? _parseRecordDate(String? isoDate, String? timestamp) {
+    if (isoDate != null && isoDate.isNotEmpty) {
+      final dt = DateTime.tryParse(isoDate);
+      if (dt != null) return dt;
+    }
+    if (timestamp != null && timestamp.length >= 10) {
+      final dateStr = timestamp.substring(0, 10).replaceAll('.', '-');
+      final dt = DateTime.tryParse(dateStr);
+      if (dt != null) return dt;
+    }
+    return null;
+  }
+
   Future<void> _loadStats() async {
     final prefs = await SharedPreferences.getInstance();
     final savedJsonList = prefs.getStringList('saved_ritual_history_v1') ?? [];
 
-    final storedCount = prefs.getInt('weekly_ritual_count');
+    final thisWeekMon = _getThisWeekMonday();
+    final thisWeekSun = DateTime(thisWeekMon.year, thisWeekMon.month, thisWeekMon.day + 6, 23, 59, 59);
+
+    final thisWeekMonStr = thisWeekMon.toIso8601String().substring(0, 10);
+    final storedWeekStr = prefs.getString('weekly_ritual_reset_monday');
+
+    int thisWeekDynamicCount = 0;
+    for (final raw in savedJsonList) {
+      try {
+        final decoded = jsonDecode(raw) as Map<String, dynamic>;
+        final dt = _parseRecordDate(decoded['isoDate'] as String?, decoded['timestamp'] as String?);
+        if (dt != null && !dt.isBefore(thisWeekMon) && !dt.isAfter(thisWeekSun)) {
+          thisWeekDynamicCount++;
+        }
+      } catch (_) {}
+    }
+
+    int count;
+    if (storedWeekStr != thisWeekMonStr) {
+      // Week changed! Reset weekly ritual count
+      count = thisWeekDynamicCount;
+      await prefs.setString('weekly_ritual_reset_monday', thisWeekMonStr);
+      await prefs.setInt('weekly_ritual_count', count);
+    } else {
+      count = prefs.getInt('weekly_ritual_count') ?? thisWeekDynamicCount;
+    }
+
     final storedMinutes = prefs.getInt('total_ritual_minutes');
     final storedStreak = prefs.getInt('ritual_streak_days');
 
-    final count = storedCount ?? (4 + savedJsonList.length);
     final minutes = storedMinutes ?? (326 + (savedJsonList.length * 5));
     final streak = storedStreak ?? 7;
 

@@ -167,70 +167,104 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
     _loadSavedRecords();
   }
 
+  DateTime _getThisWeekMonday() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    return today.subtract(Duration(days: today.weekday - 1));
+  }
+
+  DateTime? _parseRecordDate(String? isoDate, String? timestamp) {
+    if (isoDate != null && isoDate.isNotEmpty) {
+      final dt = DateTime.tryParse(isoDate);
+      if (dt != null) return dt;
+    }
+    if (timestamp != null && timestamp.length >= 10) {
+      final dateStr = timestamp.substring(0, 10).replaceAll('.', '-');
+      final dt = DateTime.tryParse(dateStr);
+      if (dt != null) return dt;
+    }
+    return null;
+  }
+
   Future<void> _loadSavedRecords() async {
     final prefs = await SharedPreferences.getInstance();
     final savedJsonList = prefs.getStringList('saved_ritual_history_v1') ?? [];
 
-    final List<RitualRecordItem> dynamicSavedItems = [];
+    final thisWeekMon = _getThisWeekMonday();
+    final thisWeekSun = DateTime(thisWeekMon.year, thisWeekMon.month, thisWeekMon.day + 6, 23, 59, 59);
+
+    final List<RitualRecordItem> thisWeekDynamicItems = [];
+    final List<RitualRecordItem> allDynamicItems = [];
+
     for (final raw in savedJsonList) {
       try {
         final decoded = jsonDecode(raw) as Map<String, dynamic>;
-        dynamicSavedItems.add(
-          RitualRecordItem(
-            title: decoded['title'] as String? ?? '4-7-8 호흡',
-            timestamp: decoded['timestamp'] as String? ?? '',
-            bgImagePath: decoded['bgImagePath'] as String? ?? 'assets/images/bg_breath_478.png',
-            durationString: decoded['durationString'] as String? ?? '05:04',
-            cycleCount: decoded['cycleCount'] as int? ?? 1,
-            aiHeadline: decoded['aiHeadline'] as String?,
-            aiQuote: decoded['aiQuote'] as String?,
-            aiFeedbackText: decoded['aiFeedbackText'] as String?,
-            isAdaptiveRamp: decoded['isAdaptiveRamp'] as bool? ?? false,
-          ),
+        final item = RitualRecordItem(
+          title: decoded['title'] as String? ?? '4-7-8 호흡',
+          timestamp: decoded['timestamp'] as String? ?? '',
+          bgImagePath: decoded['bgImagePath'] as String? ?? 'assets/images/bg_breath_478.png',
+          durationString: decoded['durationString'] as String? ?? '05:04',
+          cycleCount: decoded['cycleCount'] as int? ?? 1,
+          aiHeadline: decoded['aiHeadline'] as String?,
+          aiQuote: decoded['aiQuote'] as String?,
+          aiFeedbackText: decoded['aiFeedbackText'] as String?,
+          isAdaptiveRamp: decoded['isAdaptiveRamp'] as bool? ?? false,
         );
+        allDynamicItems.add(item);
+
+        final dt = _parseRecordDate(decoded['isoDate'] as String?, item.timestamp);
+        if (dt != null && !dt.isBefore(thisWeekMon) && !dt.isAfter(thisWeekSun)) {
+          thisWeekDynamicItems.add(item);
+        }
       } catch (_) {}
     }
 
-    if (dynamicSavedItems.isNotEmpty) {
-      final combined = [...dynamicSavedItems, ..._defaultThisWeekRecords];
-      final currentMonthStr = '${DateTime.now().year}년 ${DateTime.now().month}월';
-
-      if (mounted) {
-        setState(() {
-          _thisWeekRecords = combined;
-          _monthGroups = [
-            RitualMonthGroup(
-              monthHeader: currentMonthStr,
-              isExpanded: true,
-              items: combined,
-            ),
-            RitualMonthGroup(
-              monthHeader: '2026년 8월',
-              isExpanded: false,
-              items: const [
-                RitualRecordItem(
-                  title: '4-7-8 호흡',
-                  timestamp: '2026.08.28 오후 9:15',
-                  bgImagePath: 'assets/images/bg_breath_478.png',
-                  inhaleSec: 4.0,
-                  holdSec: 7.0,
-                  exhaleSec: 8.0,
-                  isAdaptiveRamp: true,
-                ),
-                RitualRecordItem(
-                  title: '세미 박스 호흡',
-                  timestamp: '2026.08.15 오후 2:40',
-                  bgImagePath: 'assets/images/bg_breath_semi_box.png',
-                  inhaleSec: 4.0,
-                  holdSec: 2.0,
-                  exhaleSec: 4.0,
-                  hold2Sec: 2.0,
-                ),
-              ],
-            ),
-          ];
-        });
+    // Check default sample items for this week as well
+    for (final item in _defaultThisWeekRecords) {
+      final dt = _parseRecordDate(null, item.timestamp);
+      if (dt != null && !dt.isBefore(thisWeekMon) && !dt.isAfter(thisWeekSun)) {
+        thisWeekDynamicItems.add(item);
       }
+    }
+
+    final currentMonthStr = '${DateTime.now().year}년 ${DateTime.now().month}월';
+    final allMonthItems = [...allDynamicItems, ..._defaultThisWeekRecords];
+
+    if (mounted) {
+      setState(() {
+        _thisWeekRecords = thisWeekDynamicItems;
+        _monthGroups = [
+          RitualMonthGroup(
+            monthHeader: currentMonthStr,
+            isExpanded: true,
+            items: allMonthItems,
+          ),
+          RitualMonthGroup(
+            monthHeader: '2026년 8월',
+            isExpanded: false,
+            items: const [
+              RitualRecordItem(
+                title: '4-7-8 호흡',
+                timestamp: '2026.08.28 오후 9:15',
+                bgImagePath: 'assets/images/bg_breath_478.png',
+                inhaleSec: 4.0,
+                holdSec: 7.0,
+                exhaleSec: 8.0,
+                isAdaptiveRamp: true,
+              ),
+              RitualRecordItem(
+                title: '세미 박스 호흡',
+                timestamp: '2026.08.15 오후 2:40',
+                bgImagePath: 'assets/images/bg_breath_semi_box.png',
+                inhaleSec: 4.0,
+                holdSec: 2.0,
+                exhaleSec: 4.0,
+                hold2Sec: 2.0,
+              ),
+            ],
+          ),
+        ];
+      });
     }
   }
 

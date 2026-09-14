@@ -197,6 +197,7 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
       final recordMap = {
         'title': widget.title,
         'timestamp': timestampStr,
+        'isoDate': now.toIso8601String(),
         'bgImagePath': widget.bgImagePath,
         'durationSeconds': durationSec,
         'durationString': widget.durationString,
