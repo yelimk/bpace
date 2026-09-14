@@ -231,15 +231,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 14),
 
-                      // 8. Google Social Login Pill Button (Google로 계속하기 - Tightly grouped)
+                      // 8. Google Social Login Pill Button (Google로 시작하기 - Tightly grouped)
                       _buildSocialPillButton(
                         icon: Image.asset(
                           'assets/images/ic_google.png',
                           width: 22,
                           height: 22,
-                          errorBuilder: (context, error, stackTrace) => const _GoogleGLogo(size: 20),
                         ),
-                        text: 'Google로 계속하기',
+                        text: 'Google로 시작하기',
                         onTap: () {
                           _showError('구글 계정 연동 기능은 현재 준비 중입니다.');
                         },

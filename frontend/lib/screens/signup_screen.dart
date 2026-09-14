@@ -291,13 +291,12 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       const SizedBox(height: 14),
 
-                      // 9. Google Social Sign Up Pill Button (Google로 계속하기 with assets/images/ic_google.png support)
+                      // 9. Google Social Sign Up Pill Button (Google로 시작하기)
                       _buildSocialPillButton(
                         icon: Image.asset(
                           'assets/images/ic_google.png',
                           width: 22,
                           height: 22,
-                          errorBuilder: (context, error, stackTrace) => const _GoogleGLogo(size: 20),
                         ),
                         text: 'Google로 시작하기',
                         onTap: () async {
