@@ -104,6 +104,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
           await prefs.setString('user_email', user.email);
           if (user.nickname != null) await prefs.setString('user_nickname', user.nickname!);
           if (user.photoUrl != null) await prefs.setString('user_photo_url', user.photoUrl!);
+          if (mounted) setState(() {});
         }
       } catch (_) {}
     }
