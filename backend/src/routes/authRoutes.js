@@ -24,5 +24,9 @@ router.get('/me', authenticateToken, authController.getMe);
 // POST /api/auth/dev-reset-users - 개발용 계정 초기화 API
 router.post('/dev-reset-users', authController.devResetUsers);
 
+// GET /api/auth/dev-list-users - 개발용 계정 목록 조회 API
+router.get('/dev-list-users', authController.devListUsers);
+
 module.exports = router;
+
 

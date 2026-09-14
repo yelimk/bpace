@@ -270,6 +270,18 @@ async function devResetUsers(req, res) {
   }
 }
 
+async function devListUsers(req, res) {
+  try {
+    const users = await prisma.user.findMany({
+      select: { id: true, email: true, name: true, authProvider: true, createdAt: true }
+    });
+    return sendSuccess(res, { count: users.length, users });
+  } catch (error) {
+    console.error('회원 목록 조회 오류:', error);
+    return sendError(res, 'SERVER_ERROR', error.message, 500);
+  }
+}
+
 module.exports = {
   signup,
   login,
@@ -277,6 +289,8 @@ module.exports = {
   logout,
   withdraw,
   getMe,
-  devResetUsers
+  devResetUsers,
+  devListUsers
 };
+
 
