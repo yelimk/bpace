@@ -100,7 +100,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
         if (res is Map<String, dynamic>) {
           final user = User.fromJson(res);
           ApiClient.instance.currentUser = user;
-          await prefs.setInt('user_id', user.id);
+          await prefs.setString('user_id', user.id.toString());
           await prefs.setString('user_email', user.email);
           if (user.nickname != null) await prefs.setString('user_nickname', user.nickname!);
           if (user.photoUrl != null) await prefs.setString('user_photo_url', user.photoUrl!);

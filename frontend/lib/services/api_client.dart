@@ -44,7 +44,7 @@ class ApiClient {
     final email = prefs.getString('user_email');
     if (email != null && email.isNotEmpty) {
       currentUser = User(
-        id: prefs.getInt('user_id') ?? 1,
+        id: prefs.getString('user_id') ?? '1',
         email: email,
         nickname: prefs.getString('user_nickname'),
         photoUrl: prefs.getString('user_photo_url'),
@@ -68,7 +68,7 @@ class ApiClient {
     } else {
       await prefs.setString(_tokenKey, token);
       if (currentUser != null) {
-        await prefs.setInt('user_id', currentUser!.id);
+        await prefs.setString('user_id', currentUser!.id.toString());
         await prefs.setString('user_email', currentUser!.email);
         if (currentUser!.nickname != null) {
           await prefs.setString('user_nickname', currentUser!.nickname!);

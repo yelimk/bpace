@@ -6,7 +6,7 @@ class User {
     this.photoUrl,
   });
 
-  final int id;
+  final dynamic id;
   final String email;
   final String? nickname;
   final String? photoUrl;
@@ -21,9 +21,9 @@ class User {
   }
 
   factory User.fromJson(Map<String, dynamic> json) => User(
-        id: (json['id'] as num?)?.toInt() ?? 1,
-        email: json['email'] as String? ?? 'user@gmail.com',
-        nickname: json['nickname'] as String?,
-        photoUrl: json['photoUrl'] as String?,
+        id: json['id'] ?? 1,
+        email: json['email']?.toString() ?? 'user@gmail.com',
+        nickname: (json['nickname'] ?? json['name'])?.toString(),
+        photoUrl: json['photoUrl']?.toString(),
       );
 }
