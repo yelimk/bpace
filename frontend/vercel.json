@@ -1,8 +1,9 @@
 {
-  "name": "bpace-web",
-  "cleanUrls": true,
-  "outputDirectory": "build/web",
+  "version": 2,
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }
