@@ -637,11 +637,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 onTapPrepare: isCompleted
                     ? null
                     : () {
-                        final id = (schedule['id'] as String?) ?? title;
+                        final scheduleTitleStr = (schedule['title'] as String?) ?? title;
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => ConditionMeasurementScreen(
-                              scheduleTitle: id,
+                              scheduleTitle: scheduleTitleStr,
                             ),
                           ),
                         ).then((_) {

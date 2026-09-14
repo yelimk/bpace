@@ -76,8 +76,18 @@ class _AddScheduleModalState extends State<AddScheduleModal> {
     super.initState();
 
     final now = DateTime.now();
-    _selectedDate = DateTime(now.year, now.month, now.day);
+    _selectedDate = DateTime(now.year,now.month, now.day);
     _currentDisplayMonth = DateTime(now.year, now.month, 1);
+
+    int nextHour = now.hour;
+    int nextMinute = 0;
+    if (now.minute < 30) {
+      nextMinute = 30;
+    } else {
+      nextMinute = 0;
+      nextHour = (now.hour + 1) % 24;
+    }
+    _selectedTime = TimeOfDay(hour: nextHour, minute: nextMinute);
 
     if (widget.initialDate != null) {
       _selectedDate = widget.initialDate!;

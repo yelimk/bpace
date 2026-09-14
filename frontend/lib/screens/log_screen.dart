@@ -1046,11 +1046,11 @@ class _LogScreenState extends State<LogScreen> {
               onPressed: isCompleted
                   ? null
                   : () {
-                      final id = (schedule['id'] as String?) ?? (schedule['title'] as String?);
+                      final scheduleTitleStr = (schedule['title'] as String?) ?? (schedule['id'] as String?);
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => ConditionMeasurementScreen(
-                            scheduleTitle: id,
+                            scheduleTitle: scheduleTitleStr,
                           ),
                         ),
                       ).then((_) {
