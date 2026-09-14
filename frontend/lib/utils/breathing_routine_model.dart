@@ -80,7 +80,7 @@ class BreathingRoutineModel {
       case BreathingRoutineType.box4444:
         return 'assets/images/bg_breath_box_4444.png';
       case BreathingRoutineType.resonance55:
-        return 'assets/images/bg_breath_semi_box.png';
+        return 'assets/images/bg_breath_resonance.png';
       case BreathingRoutineType.awakening4121:
         return 'assets/images/bg_breath_awakening.png';
     }
