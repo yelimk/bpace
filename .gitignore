@@ -62,6 +62,8 @@ ehthumbs.db
 .pub-cache/
 .pub/
 build/
+!frontend/build/web/
+!frontend/build/web/**
 coverage/
 
 # iOS & Windows Ephemeral Files
