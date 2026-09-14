@@ -299,18 +299,8 @@ class _SignupScreenState extends State<SignupScreen> {
                           height: 22,
                         ),
                         text: 'Google로 시작하기',
-                        onTap: () async {
-                          final nav = Navigator.of(context);
-                          setState(() => _isSubmitting = true);
-                          try {
-                            await AuthService.instance.performGoogleSignIn();
-                          } catch (_) {}
-                          if (!mounted) return;
-                          setState(() => _isSubmitting = false);
-                          nav.pushAndRemoveUntil(
-                            MaterialPageRoute(builder: (context) => const HomeScreen()),
-                            (route) => false,
-                          );
+                        onTap: () {
+                          _showError('구글 계정 연동 기능은 현재 준비 중입니다.');
                         },
                       ),
                       const SizedBox(height: 64),
