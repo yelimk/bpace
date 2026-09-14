@@ -71,14 +71,19 @@ class _MyPageScreenState extends State<MyPageScreen> {
       } catch (_) {}
     }
 
+    final baseCount = 4 + thisWeekDynamicCount;
     int count;
     if (storedWeekStr != thisWeekMonStr) {
-      // Week changed! Reset weekly ritual count
-      count = thisWeekDynamicCount;
+      // Week changed! Reset weekly ritual count to baseline 4 + new dynamic items
+      count = baseCount;
       await prefs.setString('weekly_ritual_reset_monday', thisWeekMonStr);
       await prefs.setInt('weekly_ritual_count', count);
     } else {
-      count = prefs.getInt('weekly_ritual_count') ?? thisWeekDynamicCount;
+      final savedCount = prefs.getInt('weekly_ritual_count');
+      count = (savedCount ?? baseCount).clamp(baseCount, 99999);
+      if (savedCount != count) {
+        await prefs.setInt('weekly_ritual_count', count);
+      }
     }
 
     final storedMinutes = prefs.getInt('total_ritual_minutes');
