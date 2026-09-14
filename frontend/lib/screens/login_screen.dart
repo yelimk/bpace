@@ -6,6 +6,7 @@ import '../utils/responsive.dart';
 import '../services/api_exception.dart';
 import '../services/auth_service.dart';
 import 'home_screen.dart';
+import 'my_page_screen.dart';
 import 'signup_screen.dart';
 
 /// Login Screen (로그인 페이지 matching left screenshot 100%)
@@ -74,6 +75,9 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const HomeScreen()),
         (route) => false,
+      );
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => const MyPageScreen()),
       );
     } on ApiException catch (_) {
       // Show immediate cut-off message if account does not exist or password is wrong

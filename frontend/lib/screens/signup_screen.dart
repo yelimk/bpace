@@ -6,6 +6,7 @@ import '../utils/responsive.dart';
 import '../services/api_exception.dart';
 import '../services/auth_service.dart';
 import 'home_screen.dart';
+import 'my_page_screen.dart';
 
 /// Sign Up Screen (회원가입 페이지 matching screenshot)
 class SignupScreen extends StatefulWidget {
@@ -107,6 +108,9 @@ class _SignupScreenState extends State<SignupScreen> {
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const HomeScreen()),
         (route) => false,
+      );
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => const MyPageScreen()),
       );
     } on ApiException catch (e) {
       // DUPLICATE_EMAIL lands here with the server's own wording.
