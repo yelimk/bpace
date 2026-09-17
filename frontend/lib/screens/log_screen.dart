@@ -1821,12 +1821,12 @@ class _LogScreenState extends State<LogScreen> {
     if (_allHrvValues.isEmpty) {
       // Default sample baseline matching reference design
       hrvData = [
-        {'day': '월', 'val': 22, 'height': 50.0, 'color': const Color(0xFF454850), 'textColor': const Color(0xFF80848E)},
-        {'day': '화', 'val': 26, 'height': 80.0, 'color': const Color(0xFF4D5058), 'textColor': const Color(0xFF80848E)},
+        {'day': '월', 'val': 22, 'height': 50.0, 'color': const Color(0xFF474A52), 'textColor': const Color(0xFF80848E)},
+        {'day': '화', 'val': 26, 'height': 80.0, 'color': const Color(0xFF474A52), 'textColor': const Color(0xFF80848E)},
         {'day': '수', 'val': 32, 'height': 120.0, 'color': const Color(0xFFE4FBCB), 'textColor': const Color(0xFFE4FBCB), 'hasDot': true},
         {'day': '목', 'val': 24, 'height': 72.0, 'color': const Color(0xFF474A52), 'textColor': const Color(0xFF80848E)},
         {'day': '금', 'val': 19, 'height': 55.0, 'color': const Color(0xFFF9F6AF), 'textColor': const Color(0xFFF9F6AF), 'hasDot': true},
-        {'day': '토', 'val': 29, 'height': 105.0, 'color': const Color(0xFF555861), 'textColor': const Color(0xFF80848E)},
+        {'day': '토', 'val': 29, 'height': 105.0, 'color': const Color(0xFF474A52), 'textColor': const Color(0xFF80848E)},
         {'day': '일', 'val': 21, 'height': 62.0, 'color': const Color(0xFF474A52), 'textColor': const Color(0xFF80848E)},
       ];
     } else {
@@ -1866,7 +1866,7 @@ class _LogScreenState extends State<LogScreen> {
         final bool isHighest = (val == highestVal);
         final bool isLowest = (val == lowestVal && highestVal != lowestVal);
 
-        Color barColor = const Color(0xFF555861);
+        Color barColor = const Color(0xFF474A52);
         Color textColor = const Color(0xFF80848E);
 
         if (isHighest) {
