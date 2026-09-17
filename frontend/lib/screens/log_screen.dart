@@ -1304,7 +1304,7 @@ class _LogScreenState extends State<LogScreen> {
               color: Color(0xFF90939A),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 6),
 
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1317,7 +1317,7 @@ class _LogScreenState extends State<LogScreen> {
                   Text(
                     '$_weeklyAvgConditionScore',
                     style: GoogleFonts.outfit(
-                      fontSize: 42,
+                      fontSize: 46,
                       fontWeight: FontWeight.w400,
                       color: const Color(0xFFE4FBCB),
                       height: 1.0,
