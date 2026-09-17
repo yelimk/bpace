@@ -163,42 +163,6 @@ flowchart TD
 
 ---
 
-## 로컬 개발 및 실행 가이드 (Getting Started)
-
-### 사전 요구사항
-- Flutter SDK `>=3.0.0`
-- Node.js `v20+`
-- Gemini API Key ([https://aistudio.google.com/](https://aistudio.google.com/) 에서 무료 발급)
-
-### 프론트엔드 (Flutter)
-```bash
-git clone https://github.com/yelimk/bpace.git
-cd bpace/frontend
-flutter pub get
-flutter run
-```
-
-### 백엔드 (Node.js)
-```bash
-cd bpace/backend
-cp .env.example .env
-# .env 파일에 GEMINI_API_KEY 입력
-npm install
-npx prisma db push
-npm run dev
-```
-
-### 환경변수 (.env)
-```env
-PORT=3000
-NODE_ENV=development
-DATABASE_URL="file:./dev.db"
-JWT_SECRET="your_jwt_secret"
-GEMINI_API_KEY="your_gemini_api_key"
-```
-
----
-
 ## 깃허브 운영 규칙 (GitHub Rules)
 
 커밋 컨벤션 및 브랜치 전략은 [GITHUB_RULES.md](./GITHUB_RULES.md) 문서를 참고하세요.
