@@ -911,12 +911,8 @@ class _LogScreenState extends State<LogScreen> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
             decoration: BoxDecoration(
-              color: AppColors.darkCharcoal,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: AppColors.slateDarkGray.withAlpha(50),
-                width: 0.8,
-              ),
+              color: const Color(0xFF28292D),
+              borderRadius: BorderRadius.circular(20),
             ),
             child: const Column(
               children: [
@@ -1402,15 +1398,14 @@ class _LogScreenState extends State<LogScreen> {
 
         if (todaySchedules.isEmpty)
           const Padding(
-            padding: EdgeInsets.symmetric(vertical: 24.0),
-            child: Center(
-              child: Text(
-                '오늘 등록된 일정이 없습니다.',
-                style: TextStyle(
-                  fontFamily: AppFonts.pretendard,
-                  fontSize: 14,
-                  color: AppColors.slateGray,
-                ),
+            padding: EdgeInsets.symmetric(vertical: 20),
+            child: Text(
+              '오늘 등록된 일정이 없습니다.',
+              style: TextStyle(
+                fontFamily: AppFonts.pretendard,
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFF90939A),
               ),
             ),
           )
