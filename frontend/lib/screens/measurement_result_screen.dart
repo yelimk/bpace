@@ -889,9 +889,7 @@ class _MeasurementResultScreenState extends State<MeasurementResultScreen> {
                         initialExhaleSec: activeResult.measuredExhaleSec,
                         bgImagePath: activeRoutine.bgImagePath,
                         isAdaptiveRamp: true,
-                        targetScheduleId: widget.targetScheduleId ??
-                            (_upcomingSchedule?['id'] as String?) ??
-                            (_upcomingSchedule?['title'] as String?),
+                        targetScheduleId: widget.targetScheduleId,
                       ),
                     ),
                   );
