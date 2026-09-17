@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/local_notification_service.dart';
 
 class ScheduleStorageService {
-  static const String _prefKey = 'saved_user_schedules_v3';
+  static const String _prefKey = 'saved_user_schedules_v4';
   static List<Map<String, dynamic>>? _cachedSchedules;
 
   /// Default baseline sample schedules
@@ -24,6 +24,7 @@ class ScheduleStorageService {
         'aiHeadline': '전공 세미나 발표 전, 5분간의 4-7-8 호흡으로 완벽한 마인드셋을 갖췄어요',
         'aiQuote': '"깊은 숨을 내쉴 때마다 마음에 쌓인 부담은 아득히 멀어집니다."',
         'aiFeedbackText': '4-7-8 호흡은 날숨을 길게 유지하여 부교감신경을 활성화하는 데 탁월한 리듬이에요. 발표 전 복잡했던 머릿속을 차분하게 가라앉히고 긴장감을 진정시켰습니다.',
+        'isAdaptiveRamp': true,
       },
       {
         'id': 'default_2',
@@ -39,6 +40,7 @@ class ScheduleStorageService {
         'aiHeadline': '졸업논문 심사 전, 생리학적 한숨으로 긴장을 완화했어요',
         'aiQuote': '"두 번의 짧은 들이쉼과 긴 내쉼으로, 마음에 신선한 여유가 차오릅니다."',
         'aiFeedbackText': '생리학적 한숨은 폐포를 활짝 열어 뇌에 즉각적인 산소를 공급하고 급격한 자율신경계 긴장을 수 초 내에 가라앉히는 가장 빠른 리셋 호흡입니다.',
+        'isAdaptiveRamp': true,
       },
       {
         'id': 'default_3',

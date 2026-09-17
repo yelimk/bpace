@@ -478,6 +478,9 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
                                   builder: (context) => BreathingExerciseScreen(
                                     title: widget.title,
                                     bgImagePath: widget.bgImagePath,
+                                    isAdaptiveRamp: widget.isAdaptiveRamp,
+                                    initialInhaleSec: widget.isAdaptiveRamp ? 2.8 : null,
+                                    initialExhaleSec: widget.isAdaptiveRamp ? 3.4 : null,
                                   ),
                                 ),
                               );

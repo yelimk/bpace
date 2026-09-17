@@ -1561,6 +1561,7 @@ class _LogScreenState extends State<LogScreen> {
           initialQuote: aiQuote,
           initialFeedbackText: aiFeedbackText,
           isAlreadySaved: true,
+          isAdaptiveRamp: schedule['isAdaptiveRamp'] as bool? ?? true,
         ),
       ),
     );

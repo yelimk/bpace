@@ -124,6 +124,7 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
         inhaleSec: 2.0,
         inhale2Sec: 1.5,
         exhaleSec: 4.5,
+        isAdaptiveRamp: true,
       ),
       RitualRecordItem(
         title: '4-4-4-4 호흡',
