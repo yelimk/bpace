@@ -750,7 +750,7 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
             ),
             SizedBox(height: 16),
             Text(
-              'Gemini AI가 이번 호흡 리추얼 결과 분석 중...',
+              '새로 완주하신 호흡 데이터를 기반으로 AI 피드백 분석 중...',
               style: TextStyle(
                 fontFamily: AppFonts.pretendard,
                 fontSize: 13.5,
