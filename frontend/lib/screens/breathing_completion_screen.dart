@@ -9,6 +9,7 @@ import '../utils/schedule_storage_service.dart';
 import '../services/api_client.dart';
 import '../services/report_service.dart';
 import 'breathing_exercise_screen.dart';
+import 'home_screen.dart';
 
 /// Breathing Completion Screen (Ritual Feedback - 스크롤 가능한 호흡 종료 피드백 화면)
 class BreathingCompletionScreen extends StatefulWidget {
@@ -23,6 +24,7 @@ class BreathingCompletionScreen extends StatefulWidget {
   final String? initialFeedbackText;
   final bool isAlreadySaved;
   final bool isAdaptiveRamp;
+  final String? fromSource;
 
   const BreathingCompletionScreen({
     super.key,
@@ -37,6 +39,7 @@ class BreathingCompletionScreen extends StatefulWidget {
     this.initialFeedbackText,
     this.isAlreadySaved = false,
     this.isAdaptiveRamp = false,
+    this.fromSource,
   });
 
   @override
@@ -247,9 +250,23 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
       debugPrint('[BreathingCompletionScreen] Save record error: $e');
     }
 
-    // 5. Navigate directly back to Home Screen
+    // 5. Navigate based on fromSource parameter
     if (mounted) {
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      if (widget.fromSource == 'breath') {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) => const HomeScreen(initialIndex: 2),
+          ),
+          (route) => false,
+        );
+      } else {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) => const HomeScreen(initialIndex: 0),
+          ),
+          (route) => false,
+        );
+      }
     }
   }
 
@@ -347,7 +364,11 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
       children: [
         GestureDetector(
           onTap: () {
-            Navigator.of(context).popUntil((route) => route.isFirst);
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            }
           },
           child: Container(
             width: 44,
@@ -481,6 +502,7 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
                                     isAdaptiveRamp: widget.isAdaptiveRamp,
                                     initialInhaleSec: widget.isAdaptiveRamp ? 2.8 : null,
                                     initialExhaleSec: widget.isAdaptiveRamp ? 3.4 : null,
+                                    fromSource: widget.fromSource,
                                   ),
                                 ),
                               );

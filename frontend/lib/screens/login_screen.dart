@@ -249,9 +249,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: 22,
                         ),
                         text: 'Google로 계속하기',
-                        onTap: () {
-                          _showError('구글 계정 연동 기능은 현재 준비 중입니다.');
-                        },
+                        onTap: () {},
                       ),
                       const SizedBox(height: 110),
 

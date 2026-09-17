@@ -638,6 +638,7 @@ class _RecommendedBreathingScreenState
                             targetHoldSec: item.holdSec,
                             targetExhaleSec: item.exhaleSec,
                             targetHold2Sec: item.hold2Sec,
+                            fromSource: 'breath',
                           ),
                         ),
                       );

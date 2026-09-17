@@ -591,6 +591,7 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
           initialFeedbackText: item.aiFeedbackText,
           isAlreadySaved: true,
           isAdaptiveRamp: item.isAdaptiveRamp,
+          fromSource: 'history',
         ),
       ),
     ).then((_) => _loadSavedRecords());
@@ -610,6 +611,7 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
           isAdaptiveRamp: item.isAdaptiveRamp,
           initialInhaleSec: item.isAdaptiveRamp ? 2.8 : null,
           initialExhaleSec: item.isAdaptiveRamp ? 3.4 : null,
+          fromSource: 'breath',
         ),
       ),
     );

@@ -890,6 +890,7 @@ class _MeasurementResultScreenState extends State<MeasurementResultScreen> {
                         bgImagePath: activeRoutine.bgImagePath,
                         isAdaptiveRamp: true,
                         targetScheduleId: widget.targetScheduleId,
+                        fromSource: 'home',
                       ),
                     ),
                   );
