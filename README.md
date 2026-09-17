@@ -1,4 +1,4 @@
-﻿# BPACE (Breath Pace & Care)
+# BPACE
 
 스마트폰 카메라 PPG 센서 기반 심박수·컨디션 측정 및 맞춤형 호흡 케어 웰니스 플랫폼
 
@@ -8,7 +8,7 @@
 
 | 서비스 | URL |
 | :--- | :--- |
-| 웹 앱 (Vercel) | https://bpace.vercel.app |
+| 웹 (Vercel) | https://bpace.vercel.app |
 | 백엔드 API (Render) | https://bpace.onrender.com |
 | GitHub 저장소 | https://github.com/yelimk/bpace |
 
@@ -40,7 +40,7 @@ BPACE는 별도의 웨어러블 기기 없이 **스마트폰 카메라(PPG, 광�
 | 회복 | 2-1-4-1 횡격막 복식호흡 | 횡격막 활성화 심호흡 |
 | 각성 | 4-1-2-1 각성 호흡 | 교감신경 자극, 집중력·각성 유도 |
 
-### 3. Gemini 2.0 Flash AI 실시간 분석 & 피드백
+### 3. Gemini Flash AI 실시간 분석 & 피드백
 - **슬롯 A**: 생체 수치 변동폭 기반 4단계 맞춤형 심박 분석 리포트 생성
 - **슬롯 B**: 호흡 완주 후 피드백 + 오늘의 마인드풀니스 감성 문구 (`todaysQuote`) 생성
 
@@ -75,7 +75,7 @@ BPACE는 별도의 웨어러블 기기 없이 **스마트폰 카메라(PPG, 광�
 | ORM | Prisma v6 |
 | DB (개발/운영) | SQLite (`file:./dev.db`) |
 | 인증 | JWT (`jsonwebtoken`) + bcrypt (`bcryptjs`) |
-| AI 연동 | Google AI Studio Gemini 2.0 Flash (Free Tier) |
+| AI 연동 | Google AI Studio Gemini Flash — 3.8 / 3.6 / 3.5 순차 폴백 (Free Tier) |
 | 배포 | Render Web Service Singapore 리전 (`render.yaml` 포함) |
 
 ### 인프라 방침
@@ -168,7 +168,7 @@ $$\text{Condition Score} = \text{Round}\Big(0.4 \times S_{\text{BPM}} + 0.6 \tim
 | POST | `/api/schedules` | 신규 일정 등록 및 30분 전 알림 연산 |
 | DELETE | `/api/schedules/:id` | 일정 삭제 |
 
-### Gemini 2.0 Flash AI 리포트 — `/api/reports`
+### Gemini Flash AI 리포트 — `/api/reports`
 
 | Method | Endpoint | 설명 |
 | :--- | :--- | :--- |
