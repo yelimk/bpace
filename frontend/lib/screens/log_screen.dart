@@ -288,6 +288,38 @@ class _LogScreenState extends State<LogScreen> {
     final today = DateTime(now.year, now.month, now.day);
     final thisWeekMonday = today.subtract(Duration(days: today.weekday - 1));
 
+    final scoreListV2 = prefs.getStringList('condition_score_history_v2');
+    if (scoreListV2 != null && scoreListV2.isNotEmpty) {
+      final List<int> thisWeekScores = [];
+      for (final entry in scoreListV2) {
+        DateTime? entryDate;
+        String payload = entry;
+        if (entry.contains('|')) {
+          final pipeParts = entry.split('|');
+          entryDate = DateTime.tryParse(pipeParts[0]);
+          payload = pipeParts[1];
+        }
+
+        if (entryDate != null && entryDate.isBefore(thisWeekMonday)) {
+          continue;
+        }
+
+        final parts = payload.split(':');
+        if (parts.length == 2) {
+          final v = int.tryParse(parts[1]);
+          if (v != null) thisWeekScores.add(v);
+        } else {
+          final v = int.tryParse(payload);
+          if (v != null) thisWeekScores.add(v);
+        }
+      }
+      if (mounted && thisWeekScores.isNotEmpty) {
+        setState(() {
+          _recordedConditionScores = thisWeekScores;
+        });
+      }
+    }
+
     final hrListV2 = prefs.getStringList('hr_history_v2');
     if (hrListV2 != null && hrListV2.isNotEmpty) {
       final Map<int, List<int>> map = {};

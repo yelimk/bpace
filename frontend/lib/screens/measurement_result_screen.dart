@@ -44,21 +44,21 @@ class _MeasurementResultScreenState extends State<MeasurementResultScreen> {
     final score = (activeResult.hrvSdnnMs * 1.4 + 40).clamp(50.0, 96.0).round();
 
     // 1. Calculate past score average from condition_score_history
-    final history = prefs.getStringList('condition_score_history') ?? ['72', '76', '70', '74'];
+    final history = prefs.getStringList('condition_score_history') ?? [];
     if (history.isNotEmpty) {
       final int sum = history.map((e) => int.tryParse(e) ?? 72).reduce((a, b) => a + b);
       _pastAvgScore = (sum / history.length).round();
     } else {
-      _pastAvgScore = 72;
+      _pastAvgScore = score;
     }
 
     // Calculate past HR average from hr_history
-    final hrHistory = prefs.getStringList('hr_history') ?? ['74', '80', '76'];
+    final hrHistory = prefs.getStringList('hr_history') ?? [];
     if (hrHistory.isNotEmpty) {
       final int sumHr = hrHistory.map((e) => int.tryParse(e) ?? 75).reduce((a, b) => a + b);
       _pastAvgHr = (sumHr / hrHistory.length).round();
     } else {
-      _pastAvgHr = 75;
+      _pastAvgHr = activeResult.bpm;
     }
 
     // Calculate past HRV average from hrv_history_v2
@@ -76,10 +76,10 @@ class _MeasurementResultScreenState extends State<MeasurementResultScreen> {
       if (vals.isNotEmpty) {
         _pastAvgHrv = (vals.reduce((a, b) => a + b) / vals.length).round();
       } else {
-        _pastAvgHrv = 24;
+        _pastAvgHrv = activeResult.hrvSdnnMs.round();
       }
     } else {
-      _pastAvgHrv = 24;
+      _pastAvgHrv = activeResult.hrvSdnnMs.round();
     }
 
     // Save current score into history
@@ -97,6 +97,10 @@ class _MeasurementResultScreenState extends State<MeasurementResultScreen> {
     final weekday = nowTime.weekday;
     final hrVal = activeResult.bpm;
     final hrvVal = activeResult.hrvSdnnMs.round();
+
+    final scoreHistoryV2 = prefs.getStringList('condition_score_history_v2') ?? [];
+    scoreHistoryV2.add('$isoNow|$weekday:$score');
+    await prefs.setStringList('condition_score_history_v2', scoreHistoryV2);
 
     final hrHistoryV2 = prefs.getStringList('hr_history_v2') ?? [];
     hrHistoryV2.add('$isoNow|$weekday:$hrVal');
