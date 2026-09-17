@@ -47,10 +47,10 @@ class Measurement {
 
   factory Measurement.fromJson(Map<String, dynamic> json) => Measurement(
         id: json['id']?.toString() ?? '0',
-        hr: (json['hr'] as num?)?.toDouble(),
-        hrv: (json['hrv'] as num?)?.toDouble(),
+        hr: ((json['hr'] ?? json['bpm']) as num?)?.toDouble(),
+        hrv: ((json['hrv'] ?? json['rmssd'] ?? json['sdnn']) as num?)?.toDouble(),
         conditionScore: (json['conditionScore'] as num?)?.toDouble(),
-        quality: MeasurementQuality.parse(json['quality'] as String?),
+        quality: MeasurementQuality.parse(json['quality'] as String? ?? json['signalQuality'] as String?),
         measuredAt: json['measuredAt'] != null
             ? DateTime.parse(json['measuredAt'] as String).toLocal()
             : DateTime.now(),

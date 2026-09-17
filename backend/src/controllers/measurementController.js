@@ -57,8 +57,11 @@ async function createMeasurement(req, res) {
       bpm: result.bpm,
       rmssd: result.rmssd,
       sdnn: result.sdnn,
+      hr: result.bpm,
+      hrv: result.rmssd,
       conditionScore: result.conditionScore,
       signalQuality: result.signalQuality,
+      quality: (result.signalQuality || 'GOOD').toUpperCase(),
       samplesCount: result.sampleCount,
       measuredAt: savedMeasurement ? savedMeasurement.measuredAt.toISOString() : new Date().toISOString(),
       recommendedRoutine: result.recommendedRoutine
@@ -96,8 +99,11 @@ async function analyzeMeasurement(req, res) {
       bpm: result.bpm,
       rmssd: result.rmssd,
       sdnn: result.sdnn,
+      hr: result.bpm,
+      hrv: result.rmssd,
       conditionScore: result.conditionScore,
       signalQuality: result.signalQuality,
+      quality: (result.signalQuality || 'GOOD').toUpperCase(),
       samplesCount: result.sampleCount,
       measuredAt: new Date().toISOString(),
       recommendedRoutine: result.recommendedRoutine
