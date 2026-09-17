@@ -1543,7 +1543,7 @@ class _LogScreenState extends State<LogScreen> {
   void _openCompletedRitualFeedback(Map<String, dynamic> schedule) {
     final title = schedule['title'] as String? ?? '맞춤 호흡';
 
-    String routineName = schedule['routineName'] as String? ?? '4-7-8 딥이완 호흡';
+    String routineName = schedule['routineName'] as String? ?? '4-7-8 호흡';
     String durationString = schedule['durationString'] as String? ?? '05:04';
     int cycleCount = schedule['cycleCount'] as int? ?? 4;
     String bgImagePath = schedule['bgImagePath'] as String? ?? 'assets/images/bg_breath_478.png';
