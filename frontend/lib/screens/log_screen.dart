@@ -1345,9 +1345,7 @@ class _LogScreenState extends State<LogScreen> {
           decoration: BoxDecoration(
             color: isHighlight
                 ? const Color(0xFFE4FBCB)
-                : (index == 2 || index == 4
-                    ? const Color(0xFF566352)
-                    : const Color(0xFF43474E)),
+                : const Color(0xFF474A52),
             borderRadius: BorderRadius.circular(6),
             boxShadow: isHighlight
                 ? const [
