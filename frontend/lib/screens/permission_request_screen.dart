@@ -31,6 +31,7 @@ class PermissionRequestScreen extends StatelessWidget {
     if (!kIsWeb) {
       try {
         await Permission.camera.request();
+        await Permission.notification.request();
       } catch (_) {}
     }
     if (!context.mounted) return;

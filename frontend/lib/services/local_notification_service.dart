@@ -51,9 +51,16 @@ class LocalNotificationService {
         enableVibration: true,
       );
 
-      await _plugin
-          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-          ?.createNotificationChannel(androidChannel);
+      final androidImplementation =
+          _plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+
+      await androidImplementation?.createNotificationChannel(androidChannel);
+
+      if (!kIsWeb) {
+        try {
+          await androidImplementation?.requestNotificationsPermission();
+        } catch (_) {}
+      }
 
       _isInitialized = true;
       debugPrint('[LOCAL_NOTIF_INIT] LocalNotificationService initialized successfully.');
@@ -110,21 +117,83 @@ class LocalNotificationService {
 
       final tzReminderTime = tz.TZDateTime.from(reminderTime, tz.local);
 
-      await _plugin.zonedSchedule(
-        notificationId,
-        '[일정 30분 전] $title',
-        '곧 \'$title\' 일정이 시작됩니다. 맞춤 호흡으로 마음을 가다듬어보세요 🌿',
-        tzReminderTime,
-        details,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        payload: id,
-      );
+      try {
+        await _plugin.zonedSchedule(
+          notificationId,
+          '[일정 30분 전] $title',
+          '곧 \'$title\' 일정이 시작됩니다. 맞춤 호흡으로 마음을 가다듬어보세요 🌿',
+          tzReminderTime,
+          details,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          payload: id,
+        );
+      } catch (e) {
+        debugPrint('[LOCAL_NOTIF_EXACT_FALLBACK] Exact alarm failed, falling back to inexact mode: $e');
+        await _plugin.zonedSchedule(
+          notificationId,
+          '[일정 30분 전] $title',
+          '곧 \'$title\' 일정이 시작됩니다. 맞춤 호흡으로 마음을 가다듬어보세요 🌿',
+          tzReminderTime,
+          details,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          payload: id,
+        );
+      }
 
       debugPrint('[LOCAL_NOTIF_SCHEDULED] Notification ID: $notificationId scheduled for "$title" at $tzReminderTime');
     } catch (e) {
       debugPrint('[LOCAL_NOTIF_SCHEDULE_ERROR] $e');
+    }
+  }
+
+  /// Displays an instant push notification for testing purposes (triggers after 3 seconds)
+  Future<void> showInstantTestNotification({
+    String title = 'BPACE 호흡 리추얼 테스트',
+    String body = '로컬 푸시 알림이 정상적으로 동작하고 있습니다! 🌿',
+  }) async {
+    await initialize();
+    try {
+      const androidDetails = AndroidNotificationDetails(
+        'bpace_ritual_reminders',
+        'BPACE 호흡 리추얼 알림',
+        channelDescription: '일정 30분 전 맞춤 호흡 안내 알림',
+        importance: Importance.high,
+        priority: Priority.high,
+        playSound: true,
+        enableVibration: true,
+        icon: '@mipmap/ic_launcher',
+      );
+
+      const iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+
+      const details = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      final scheduledTime = tz.TZDateTime.now(tz.local).add(const Duration(seconds: 3));
+
+      await _plugin.zonedSchedule(
+        99999,
+        title,
+        body,
+        scheduledTime,
+        details,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+      );
+      debugPrint('[LOCAL_NOTIF_TEST] Instant notification scheduled in 3 seconds.');
+    } catch (e) {
+      debugPrint('[LOCAL_NOTIF_TEST_ERROR] $e');
     }
   }
 
