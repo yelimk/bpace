@@ -3,7 +3,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 
 import 'api_client.dart';
-import 'api_exception.dart';
 
 /// Push notifications for calendar reminders.
 ///
