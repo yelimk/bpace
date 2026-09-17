@@ -60,10 +60,18 @@ class _ConditionMeasurementScreenState
   @override
   void initState() {
     super.initState();
+    _prewarmServer();
     _waveAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 8),
     )..repeat();
+  }
+
+  void _prewarmServer() {
+    // 백그라운드로 Render 서버 헬스체크(/api/health) 핑을 날려 수면(Sleep) 상태의 서버를 미리 웜업!
+    try {
+      ApiClient.instance.get('/api/health').catchError((_) {});
+    } catch (_) {}
   }
 
   @override
@@ -334,9 +342,14 @@ class _ConditionMeasurementScreenState
             : await MeasurementService.instance
                 .analyzeAsGuest(samples: waveform, fps: fps, durationSec: durationSec);
       } catch (tokenErr) {
-        debugPrint('[PPG_SUBMIT_RETRY_GUEST] Submit with token failed ($tokenErr). Retrying with analyzeAsGuest...');
-        measurement = await MeasurementService.instance
-            .analyzeAsGuest(samples: waveform, fps: fps, durationSec: durationSec);
+        debugPrint('[PPG_SUBMIT_RETRY_GUEST] Initial submit failed ($tokenErr). Auto-retrying once with analyzeAsGuest...');
+        try {
+          measurement = await MeasurementService.instance
+              .analyzeAsGuest(samples: waveform, fps: fps, durationSec: durationSec);
+        } catch (retryErr) {
+          debugPrint('[PPG_SUBMIT_RETRY_FAILED] Retry also failed ($retryErr).');
+          rethrow;
+        }
       }
 
       debugPrint('====================================================');

@@ -1,5 +1,6 @@
 import '../models/measurement.dart';
 import 'api_client.dart';
+import 'api_config.dart';
 import 'api_exception.dart';
 
 /// Sends the raw camera waveform up and gets the analysed reading back.
@@ -35,11 +36,15 @@ class MeasurementService {
   }) async {
     _validate(samples, fps, durationSec);
 
-    final data = await _client.post('/api/measurements', body: {
-      'samples': samples,
-      'fps': fps,
-      'durationSec': durationSec,
-    });
+    final data = await _client.post(
+      '/api/measurements',
+      body: {
+        'samples': samples,
+        'fps': fps,
+        'durationSec': durationSec,
+      },
+      timeout: ApiConfig.measurementTimeout,
+    );
     return Measurement.fromJson(data as Map<String, dynamic>);
   }
 
@@ -52,11 +57,15 @@ class MeasurementService {
   }) async {
     _validate(samples, fps, durationSec);
 
-    final data = await _client.post('/api/measurements/analyze', body: {
-      'samples': samples,
-      'fps': fps,
-      'durationSec': durationSec,
-    });
+    final data = await _client.post(
+      '/api/measurements/analyze',
+      body: {
+        'samples': samples,
+        'fps': fps,
+        'durationSec': durationSec,
+      },
+      timeout: ApiConfig.measurementTimeout,
+    );
     return Measurement.fromJson(data as Map<String, dynamic>);
   }
 

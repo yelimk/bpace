@@ -22,5 +22,6 @@ class ApiConfig {
   /// GET. The AI report is slower still: it calls an external model and can
   /// take several seconds on a cache miss.
   static const Duration timeout = Duration(seconds: 20);
+  static const Duration measurementTimeout = Duration(seconds: 45);
   static const Duration reportTimeout = Duration(seconds: 60);
 }
