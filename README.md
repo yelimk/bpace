@@ -126,67 +126,47 @@ BPACE는 별도의 웨어러블 기기 없이 **스마트폰 카메라(PPG, 광�
 
 ---
 
-## 화면 구성 (Screens)
+## 서비스 아키텍처 및 흐름도 (Architecture & User Flow)
 
-| 파일명 | 화면 설명 |
-| :--- | :--- |
-| `splash_screen.dart` | 앱 초기 로딩 및 세션 복원 |
-| `onboarding_screen.dart` | 최초 실행 온보딩 안내 |
-| `permission_request_screen.dart` | 카메라/알림 권한 요청 |
-| `login_screen.dart` | 로그인 (이메일 / 게스트) |
-| `signup_screen.dart` | 회원가입 |
-| `home_screen.dart` | 홈 — 컨디션 대시보드 및 캘린더 일정 |
-| `condition_measurement_screen.dart` | PPG 카메라 생체 측정 |
-| `measurement_result_screen.dart` | 측정 결과 및 AI 리포트 확인 |
-| `recommended_breathing_screen.dart` | 맞춤형 호흡 루틴 추천 |
-| `breathing_exercise_screen.dart` | 호흡 가이드 수행 화면 |
-| `breathing_completion_screen.dart` | 호흡 완료 피드백 및 `todaysQuote` |
-| `log_screen.dart` | 주간/월별 생체 데이터 HRV 차트 |
-| `ritual_history_screen.dart` | 월별 아코디언 호흡 완주 기록 |
-| `add_schedule_modal.dart` | 일정 등록 모달 |
-| `my_page_screen.dart` | 마이페이지 — 프로필 및 설정 |
+### 1. 시스템 아키텍처 (System Architecture)
 
----
+```mermaid
+graph TD
+    subgraph Client ["클라이언트 (Client)"]
+        UI["Flutter Web App (Vercel)"]
+        PPG["카메라 PPG 20초 생체 측정"]
+    end
 
-## 프로젝트 구조 (Directory Structure)
+    subgraph Server ["백엔드 (API Server)"]
+        API["Node.js Express REST API (Render)"]
+        Calc["PPG 신호 처리 (BPM / HRV / 컨디션 지수)"]
+        Matrix["2D 의사결정 매트릭스 (생체 수치 x 일정)"]
+    end
 
-```text
-bpace/
-├── frontend/                          # Flutter 멀티플랫폼 앱
-│   ├── lib/
-│   │   ├── main.dart                  # 앱 진입점 및 테마 설정
-│   │   ├── screens/                   # 화면 15개
-│   │   ├── services/                  # API 클라이언트, 인증, 알림, 리포트 서비스
-│   │   ├── models/                    # 데이터 모델 (User, Measurement)
-│   │   ├── widgets/                   # 공통 위젯 (BpaceLogo)
-│   │   ├── theme/                     # AppColors, AppTextStyles
-│   │   └── utils/                     # 유틸리티 함수
-│   ├── assets/
-│   │   ├── fonts/                     # Pretendard, GmarketSans 폰트
-│   │   ├── images/                    # 앱 이미지 자원
-│   │   └── audio/                     # 호흡 가이드 오디오
-│   ├── vercel.json                    # Vercel SPA 라우팅 설정
-│   └── pubspec.yaml                   # Flutter 의존성 명세
-├── backend/                           # Node.js Express REST API 서버
-│   ├── src/
-│   │   ├── server.js                  # 서버 진입점
-│   │   ├── app.js                     # Express 앱 설정 및 미들웨어
-│   │   ├── routes/                    # API 라우터 7개
-│   │   ├── controllers/               # 요청 핸들러
-│   │   ├── services/                  # Gemini AI 서비스, 리포트 프롬프트
-│   │   ├── middlewares/               # JWT 인증 미들웨어
-│   │   └── utils/                     # 유틸리티 함수
-│   ├── prisma/
-│   │   ├── schema.prisma              # DB 스키마 (5개 모델)
-│   │   └── migrations/                # 마이그레이션 파일
-│   ├── render.yaml                    # Render 배포 Blueprint
-│   ├── Dockerfile                     # Docker 컨테이너 설정
-│   ├── .env.example                   # 환경변수 템플릿
-│   └── package.json                   # Node.js 의존성 명세
-├── GITHUB_RULES.md                    # 커밋 컨벤션 및 브랜치 전략
-├── LICENSE                            # MIT License
-└── README.md                          # 프로젝트 통합 문서
+    subgraph Infra ["DB & AI 서비스"]
+        DB[(Prisma ORM / SQLite)]
+        Gemini["Google Gemini 2.0 Flash AI"]
+    end
+
+    UI -->|20초 파형 수집| API
+    PPG --> UI
+    API --> Calc
+    Calc --> Matrix
+    API <--> DB
+    API -->|AI 분석 리포트 요청| Gemini
 ```
+
+### 2. 사용자 흐름도 (User Flow)
+
+```mermaid
+flowchart LR
+    A["카메라 PPG 20초 측정"] --> B["BPM·HRV·컨디션 지수 산출"]
+    B --> C{"캘린더 일정 연동"}
+    C --> D["8종 맞춤형 호흡 루틴 1종 추천"]
+    D --> E["시각·오디오 가이드 호흡 수행"]
+    E --> F["Gemini 2.0 AI 리포트 & 완주 피드백"]
+```
+
 
 ---
 
