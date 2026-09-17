@@ -8,7 +8,7 @@
 
 | 서비스 | URL | 비고 |
 | :--- | :--- | :--- |
-| 웹 (Vercel) | https://bpace.vercel.app | PPG 시뮬레이션 모드 |
+| 웹 (Vercel) | https://bpace-three.vercel.app | PPG 시뮬레이션 모드 |
 | 백엔드 API (Render) | https://bpace.onrender.com | REST API 백엔드 |
 | GitHub 저장소 | https://github.com/yelimk/bpace | 소스코드 |
 
