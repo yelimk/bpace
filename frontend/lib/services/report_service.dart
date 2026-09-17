@@ -86,6 +86,21 @@ class WeeklyReport {
         'overallGuide': overallGuide,
         'todaysQuote': todaysQuote,
       };
+
+  static WeeklyReport get initialDummyReport => WeeklyReport(
+        headline: '안정적인 자율신경계 균형과 고른 심박 리듬을 유지하고 계십니다.',
+        summary: '초기 지표 분석 결과',
+        insights: const [],
+        advice: const [],
+        disclaimer: '본 결과는 웰빙 참고용이며 의학적 진단이 아닙니다.',
+        generatedAt: DateTime.now(),
+        cached: true,
+        avgBpmAnalysis: '평균 심박수는 82 BPM으로 지표 내 휴식기 평균 수준을 안정적으로 유지하고 있습니다.',
+        maxBpmAnalysis: '최고 심박수는 94 BPM으로 일시적인 과도 활동 시에도 양호한 조절 능력을 나타냅니다.',
+        minBpmAnalysis: '최저 심박수는 68 BPM으로 휴식 시 부교감 신경의 활성화가 원활하게 작동하고 있습니다.',
+        overallGuide: '전반적인 심박 변이도(HRV)와 자율신경 조절 능력이 양호한 상태입니다. 하루 1~2회 규칙적인 호흡 리추얼을 통해 마음의 긴장을 정돈하고 건강한 리듬을 꾸준히 이어가 보세요.',
+        todaysQuote: '깊은 호흡은 마음의 고요와 삶의 리듬을 깨우는 가장 자연스러운 도구입니다.',
+      );
 }
 
 /// Breathing session completion feedback response model

@@ -164,7 +164,7 @@ class _LogScreenState extends State<LogScreen> {
         prefs.getStringList('hr_history')?.isNotEmpty == true;
 
     if (!hasMeasured) {
-      if (mounted) setState(() => _aiReport = null);
+      if (mounted) setState(() => _aiReport = WeeklyReport.initialDummyReport);
       return;
     }
 
@@ -1533,21 +1533,21 @@ class _LogScreenState extends State<LogScreen> {
     String? aiFeedbackText = schedule['aiFeedbackText'] as String?;
 
     if (title.contains('졸업논문') || title.contains('심사')) {
-      routineName = schedule['routineName'] as String? ?? '4-6 릴렉스 호흡';
-      durationString = schedule['durationString'] as String? ?? '04:30';
-      cycleCount = schedule['cycleCount'] as int? ?? 3;
-      bgImagePath = schedule['bgImagePath'] as String? ?? 'assets/images/bg_breath_box.png';
-      aiHeadline ??= '졸업논문 심사 전, 긴장 해소와 또렷한 집중력을 완벽히 제어했어요';
-      aiQuote ??= '"고요한 호흡 속에 선명해지는 집중의 순간, 심사도 차분하고 단단하게 잘 해낼 수 있습니다."';
-      aiFeedbackText ??= '중요한 논문 심사를 앞두고 4-6 릴렉스 호흡을 완주하셨네요. 심사 전 불필요한 떨림은 날숨 사이로 정돈되고, 또렷한 인지 사고와 이완 상태가 형성되었습니다.';
+      routineName = schedule['routineName'] as String? ?? '생리학적 한숨';
+      durationString = schedule['durationString'] as String? ?? '03:15';
+      cycleCount = schedule['cycleCount'] as int? ?? 20;
+      bgImagePath = schedule['bgImagePath'] as String? ?? 'assets/images/bg_breath_sigh.png';
+      aiHeadline ??= '졸업논문 심사 전, 생리학적 한숨으로 긴장을 완화했어요';
+      aiQuote ??= '"두 번의 짧은 들이쉼과 긴 내쉼으로, 마음에 신선한 여유가 차오릅니다."';
+      aiFeedbackText ??= '생리학적 한숨은 폐포를 활짝 열어 뇌에 즉각적인 산소를 공급하고 급격한 자율신경계 긴장을 수 초 내에 가라앉히는 가장 빠른 리셋 호흡입니다.';
     } else if (title.contains('발표') || title.contains('세미나')) {
-      routineName = schedule['routineName'] as String? ?? '4-7-8 딥이완 호흡';
+      routineName = schedule['routineName'] as String? ?? '4-7-8 호흡';
       durationString = schedule['durationString'] as String? ?? '05:04';
-      cycleCount = schedule['cycleCount'] as int? ?? 4;
+      cycleCount = schedule['cycleCount'] as int? ?? 16;
       bgImagePath = schedule['bgImagePath'] as String? ?? 'assets/images/bg_breath_478.png';
       aiHeadline ??= '전공 세미나 발표 전, 5분간의 4-7-8 호흡으로 완벽한 마인드셋을 갖췄어요';
-      aiQuote ??= '"발표 전 깊은 숨을 내쉴 때마다 마음에 쌓인 부담은 아득히 멀어집니다."';
-      aiFeedbackText ??= '발표 직전 4-7-8 딥이완 호흡을 완주하여 심박수가 82 BPM으로 안정되고, 과도한 교감신경 긴장감과 손 떨림이 효과적으로 진정되었습니다.';
+      aiQuote ??= '"깊은 숨을 내쉴 때마다 마음에 쌓인 부담은 아득히 멀어집니다."';
+      aiFeedbackText ??= '4-7-8 호흡은 날숨을 길게 유지하여 부교감신경을 활성화하는 데 탁월한 리듬이에요. 발표 전 복잡했던 머릿속을 차분하게 가라앉히고 긴장감을 진정시켰습니다.';
     }
 
     Navigator.of(context).push(
