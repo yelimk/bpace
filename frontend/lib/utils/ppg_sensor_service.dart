@@ -52,11 +52,8 @@ class PpgMeasurementResult {
     );
   }
 
-  /// Prefers the server's number. The local formula is a fallback for the web
-  /// simulation samples, which never reach the server.
-  int get conditionScore =>
-      serverConditionScore?.round() ??
-      (hrvSdnnMs * 1.4 + 40).clamp(50.0, 96.0).round();
+  /// Prefers the server's number.
+  int get conditionScore => serverConditionScore?.round() ?? 0;
 
 
   factory PpgMeasurementResult.defaultSample() {
