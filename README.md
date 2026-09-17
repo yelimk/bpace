@@ -6,24 +6,24 @@
 
 ## 배포 링크 (Deployment)
 
-| 서비스 | URL |
-| :--- | :--- |
-| 웹 (Vercel) | https://bpace.vercel.app |
-| 백엔드 API (Render) | https://bpace.onrender.com |
-| GitHub 저장소 | https://github.com/yelimk/bpace |
+| 서비스 | URL | 비고 |
+| :--- | :--- | :--- |
+| 웹 (Vercel) | https://bpace.vercel.app | PPG 시뮬레이션 모드 |
+| 백엔드 API (Render) | https://bpace.onrender.com | REST API 백엔드 |
+| GitHub 저장소 | https://github.com/yelimk/bpace | 소스코드 |
 
 ---
 
 ## 프로젝트 소개
 
-BPACE는 별도의 웨어러블 기기 없이 **스마트폰 카메라(PPG, 광혈류 측정)** 만으로 사용자의 심박수(BPM) 및 심박변이도(HRV)를 정밀 측정하고, 측정된 생체 데이터와 캘린더 일정 상황을 결합하여 최적의 맞춤형 호흡 루틴과 Gemini Flash AI 분석 리포트를 제공하는 웰니스 케어 솔루션입니다.
+BPACE는 별도의 웨어러블 기기 없이 **스마트폰 카메라(PPG, 광혈류 측정)** 만으로 사용자의 심박수(BPM) 및 심박변이도(HRV)를 정밀 측정하고, 측정된 생체 데이터와 캘린더 일정 상황을 결합하여 최적의 맞춤형 호흡 루틴과 Gemini Flash AI 분석 리포트를 제공하는 웰니스 케어 솔루션입니다. (웹 배포 버전은 브라우저 카메라 제약을 고려하여 **시뮬레이션 모드**로 작동합니다.)
 
 ---
 
 ## 주요 기능 (Key Features)
 
 ### 1. 스마트폰 카메라 PPG 생체 측정
-- 손가락을 카메라 렌즈 및 플래시에 밀착하여 20초간 초당 30프레임(총 600샘플) 신호 수집
+- 손가락을 카메라 렌즈 및 플래시에 밀착하여 20초간 초당 30프레임(총 600샘플) 신호 수집 (웹 환경은 시뮬레이션 파형 모드 지원)
 - 심박수(BPM), 심박변이도(HRV SDNN / RMSSD), 컨디션 지수(0~100) 자동 산출
 - 신호 품질(`good` / `poor`) 자동 판별
 
@@ -68,7 +68,7 @@ BPACE는 별도의 웨어러블 기기 없이 **스마트폰 카메라(PPG, 광�
 | 지원 플랫폼 | Web, Android, iOS, Windows |
 | 폰트 | Pretendard, GmarketSans |
 | 주요 패키지 | `camera 0.10.5+9`, `http ^1.2.0`, `audioplayers ^6.0.0`, `shared_preferences ^2.5.5`, `permission_handler 11.3.1`, `flutter_local_notifications ^17.2.0`, `firebase_messaging ^15.1.5` |
-| 배포 | Vercel (SPA 라우팅 설정 포함) |
+| 배포 | Vercel (SPA 라우팅 설정 포함, 시뮬레이션 모드) |
 
 ### Backend
 
@@ -128,13 +128,15 @@ BPACE는 별도의 웨어러블 기기 없이 **스마트폰 카메라(PPG, 광�
 
 ## 서비스 아키텍처 및 흐름도 (Architecture & User Flow)
 
+> **안내**: 웹(Vercel) 환경은 데스크톱 브라우저 제약상 **시뮬레이션 모드**로 작동하며, 모바일 앱 환경에서 실제 카메라 PPG 측정이 수행됩니다.
+
 ### 1. 시스템 아키텍처 (System Architecture)
 
 ```mermaid
 graph LR
-    Client["📱 Flutter Web App (Vercel)"] <--> Server["⚙️ Node.js Express Server (Render)"]
-    Server <--> DB[(💾 Prisma ORM / SQLite)]
-    Server <--> AI["🤖 Gemini Flash AI"]
+    Client["Flutter Web App (Vercel - 시뮬레이션 모드)"] <--> Server["Node.js Express Server (Render)"]
+    Server <--> DB[(Prisma ORM / SQLite)]
+    Server <--> AI["Gemini Flash AI"]
 ```
 
 ### 2. 사용자 흐름도 (User Flow)
@@ -142,10 +144,10 @@ graph LR
 ```mermaid
 flowchart TD
     Start(["앱 접속 (로그인 / 게스트)"]) --> Home["홈 화면 (대시보드 & 캘린더 일정 확인)"]
-    Home --> Measure["PPG 카메라 측정 (20초 손가락 밀착)"]
+    Home --> Measure["PPG 카메라 측정 (웹: 시뮬레이션 / 모바일: 손가락 20초 밀착)"]
     
     subgraph Engine ["백엔드 연산 & 융합 추천"]
-        Measure --> Calc["파형 분석 ➔ BPM · HRV · 컨디션 지수 산출"]
+        Measure --> Calc["파형 분석 -> BPM · HRV · 컨디션 지수 산출"]
         Calc --> Matrix{"캘린더 일정 카테고리 융합 (FOCUS / ACTIVE / GENERAL)"}
         Matrix --> Rec["8종 호흡 루틴 중 최적 1종 맞춤 추천"]
     end
