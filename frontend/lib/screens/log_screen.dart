@@ -2031,28 +2031,42 @@ class _LogScreenState extends State<LogScreen> {
         if (_isLoadingAiReport)
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
+            padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
             decoration: BoxDecoration(
               color: const Color(0xFF28292D),
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(
-                  width: 24,
-                  height: 24,
+                  width: 26,
+                  height: 26,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.5,
                     color: AppColors.lightMint,
                   ),
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: 14),
                 Text(
-                  '새로 변경된 생체 데이터를 기반으로 Gemini AI 리포트 분석 중...',
+                  'AI 분석 중',
+                  style: TextStyle(
+                    fontFamily: AppFonts.pretendard,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  '새로 변경된 생체 데이터를\n기반으로 분석 중이에요.',
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: AppFonts.pretendard,
                     fontSize: 13.5,
-                    color: Color(0xFFACAEB3),
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFF90939A),
+                    height: 1.45,
                   ),
                 ),
               ],
