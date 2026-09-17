@@ -111,13 +111,6 @@ class _SignupScreenState extends State<SignupScreen> {
           .signup(email: email, password: password, nickname: nickname);
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('회원가입이 성공적으로 완료되었습니다!'),
-          backgroundColor: AppColors.lightMint,
-          duration: Duration(seconds: 2),
-        ),
-      );
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const MyPageScreen()),
         (route) => false,
