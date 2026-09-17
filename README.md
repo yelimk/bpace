@@ -131,41 +131,34 @@ BPACE는 별도의 웨어러블 기기 없이 **스마트폰 카메라(PPG, 광�
 ### 1. 시스템 아키텍처 (System Architecture)
 
 ```mermaid
-graph TD
-    subgraph Client ["클라이언트 (Client)"]
-        UI["Flutter Web App (Vercel)"]
-        PPG["카메라 PPG 20초 생체 측정"]
-    end
-
-    subgraph Server ["백엔드 (API Server)"]
-        API["Node.js Express REST API (Render)"]
-        Calc["PPG 신호 처리 (BPM / HRV / 컨디션 지수)"]
-        Matrix["2D 의사결정 매트릭스 (생체 수치 x 일정)"]
-    end
-
-    subgraph Infra ["DB & AI 서비스"]
-        DB[(Prisma ORM / SQLite)]
-        Gemini["Google Gemini 2.0 Flash AI"]
-    end
-
-    UI -->|20초 파형 수집| API
-    PPG --> UI
-    API --> Calc
-    Calc --> Matrix
-    API <--> DB
-    API -->|AI 분석 리포트 요청| Gemini
+graph LR
+    Client["📱 Flutter Web App (Vercel)"] <--> Server["⚙️ Node.js Express Server (Render)"]
+    Server <--> DB[(💾 Prisma ORM / SQLite)]
+    Server <--> AI["🤖 Gemini Flash AI"]
 ```
 
 ### 2. 사용자 흐름도 (User Flow)
 
 ```mermaid
-flowchart LR
-    A["카메라 PPG 20초 측정"] --> B["BPM·HRV·컨디션 지수 산출"]
-    B --> C{"캘린더 일정 연동"}
-    C --> D["8종 맞춤형 호흡 루틴 1종 추천"]
-    D --> E["시각·오디오 가이드 호흡 수행"]
-    E --> F["Gemini 2.0 AI 리포트 & 완주 피드백"]
+flowchart TD
+    Start(["앱 접속 (로그인 / 게스트)"]) --> Home["홈 화면 (대시보드 & 캘린더 일정 확인)"]
+    Home --> Measure["PPG 카메라 측정 (20초 손가락 밀착)"]
+    
+    subgraph Engine ["백엔드 연산 & 융합 추천"]
+        Measure --> Calc["파형 분석 ➔ BPM · HRV · 컨디션 지수 산출"]
+        Calc --> Matrix{"캘린더 일정 카테고리 융합 (FOCUS / ACTIVE / GENERAL)"}
+        Matrix --> Rec["8종 호흡 루틴 중 최적 1종 맞춤 추천"]
+    end
+    
+    Rec --> Guide["호흡 가이드 수행 (시각 애니메이션 & 오디오)"]
+    Guide --> Complete["호흡 세션 완주"]
+    
+    subgraph Feedback ["AI 분석 & 기록"]
+        Complete --> AIReport["Gemini Flash AI 생체 분석 리포트 & 오늘의 한마디"]
+        Complete --> SaveLog["주간/월간 HRV 차트 & 완주 리추얼 기록 저장"]
+    end
 ```
+
 
 
 ---
