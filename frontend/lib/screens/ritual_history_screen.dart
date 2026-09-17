@@ -180,15 +180,15 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
             holdSec: 7.0,
             exhaleSec: 8.0,
           ),
-          RitualRecordItem(
-            title: '세미 박스 호흡',
-            timestamp: '2026.08.15 오후 2:40',
-            bgImagePath: 'assets/images/bg_breath_semi_box.png',
-            inhaleSec: 4.0,
-            holdSec: 2.0,
-            exhaleSec: 4.0,
-            hold2Sec: 2.0,
-          ),
+              RitualRecordItem(
+                title: '4-2-4-2 호흡',
+                timestamp: '2026.08.15 오후 2:40',
+                bgImagePath: 'assets/images/bg_breath_semi_box.png',
+                inhaleSec: 4.0,
+                holdSec: 2.0,
+                exhaleSec: 4.0,
+                hold2Sec: 2.0,
+              ),
         ],
       ),
     ];
@@ -262,7 +262,7 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
                 isAdaptiveRamp: true,
               ),
               RitualRecordItem(
-                title: '세미 박스 호흡',
+                title: '4-2-4-2 호흡',
                 timestamp: '2026.08.15 오후 2:40',
                 bgImagePath: 'assets/images/bg_breath_semi_box.png',
                 inhaleSec: 4.0,
@@ -458,8 +458,8 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
                 const Spacer(),
                 Icon(
                   group.isExpanded
-                      ? Icons.keyboard_arrow_up_rounded
-                      : Icons.keyboard_arrow_down_rounded,
+                      ? Icons.keyboard_arrow_down_rounded
+                      : Icons.chevron_right_rounded,
                   color: AppColors.lightGray,
                   size: 24,
                 ),
