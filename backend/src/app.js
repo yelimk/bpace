@@ -24,6 +24,9 @@ const scheduleRoutes = require('./routes/scheduleRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const healthRoutes = require('./routes/healthRoutes');
 
+// Root health check for lightweight cloud keepalive
+app.get('/health', (req, res) => res.status(200).json({ status: 'ok' }));
+
 // API Routes Mounting
 app.use('/api/health', healthRoutes);
 

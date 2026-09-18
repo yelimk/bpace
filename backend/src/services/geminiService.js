@@ -11,6 +11,7 @@
  * @returns {Promise<object>} Gemini AI가 생성한 JSON 결과 객체
  */
 async function generateAiContent(promptText) {
+  console.log("--- GEMINI CALLED ---", new Date().toISOString());
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey || apiKey === 'YOUR_GEMINI_API_KEY' || apiKey.trim() === '') {
@@ -29,7 +30,12 @@ async function generateAiContent(promptText) {
 
   let lastError = null;
 
-  for (const model of modelCandidates) {
+  for (let i = 0; i < modelCandidates.length; i++) {
+    const model = modelCandidates[i];
+    if (i > 0) {
+      console.log(`[GeminiService] Waiting 2.5s before attempting candidate model (${model})...`);
+      await new Promise(r => setTimeout(r, 2500));
+    }
     try {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 

@@ -312,14 +312,20 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
               _buildTopHeader(context),
               const SizedBox(height: 16),
 
-              // Main Scrollable Body
+              // Main Scrollable Body with Pull-to-Refresh
               Expanded(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.only(bottom: 24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                child: RefreshIndicator(
+                  color: AppColors.lightMint,
+                  backgroundColor: const Color(0xFF28292B),
+                  onRefresh: () async {
+                    await _fetchAiFeedback();
+                  },
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                    padding: const EdgeInsets.only(bottom: 24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                       // 1. Page Title: "Ritual Feedback"
                       Text(
                         'Ritual Feedback',
@@ -376,7 +382,8 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
                   ),
                 ),
               ),
-            ],
+            ),
+          ],
           ),
         ),
       ),

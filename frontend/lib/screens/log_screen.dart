@@ -134,7 +134,7 @@ class _LogScreenState extends State<LogScreen> {
     _fetchAiReport();
   }
 
-  Future<void> _fetchAiReport() async {
+  Future<void> _fetchAiReport({bool force = false}) async {
     if (_isLoadingAiReport) return;
 
     final prefs = await SharedPreferences.getInstance();
@@ -158,8 +158,8 @@ class _LogScreenState extends State<LogScreen> {
     final cachedSig = prefs.getString('cached_ai_report_sig');
     final cachedJson = prefs.getString('cached_ai_report_json');
 
-    // 2. 상단 데이터가 이전과 동일한 경우: 기존에 생성된 AI 리포트 재사용 (Gemini API 중복 호출 0건)
-    if (cachedSig == currentSig && cachedJson != null && cachedJson.isNotEmpty) {
+    // 2. 강제 새로고침이 아니고 상단 데이터가 이전과 동일한 경우: 기존에 생성된 AI 리포트 재사용
+    if (!force && cachedSig == currentSig && cachedJson != null && cachedJson.isNotEmpty) {
       try {
         final decoded = jsonDecode(cachedJson) as Map<String, dynamic>;
         final cachedReport = WeeklyReport.fromJson(decoded);
@@ -174,7 +174,7 @@ class _LogScreenState extends State<LogScreen> {
       }
     }
 
-    // 3. 실제 신규 측정으로 상단 수치가 새로 바뀐 경우만: Gemini AI 신규 연산 호출!
+    // 3. 실제 신규 측정이나 강제 새로고침 시에만 Gemini AI 신규 연산 호출!
     setState(() => _isLoadingAiReport = true);
     try {
       final report = await ReportService.instance.generate(
@@ -196,6 +196,7 @@ class _LogScreenState extends State<LogScreen> {
         });
       }
     } catch (e) {
+      debugPrint('[LogScreen] Gemini AI report fetch error: $e');
       if (mounted) {
         setState(() => _isLoadingAiReport = false);
       }
@@ -438,46 +439,53 @@ class _LogScreenState extends State<LogScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: Stack(
             children: [
-              // Main Scrollable Body
-              SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.only(top: 12.0, bottom: 90.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Top App Header
-                    _buildHeader(),
-                    const SizedBox(height: 18),
+              // Main Scrollable Body with Pull-to-Refresh
+              RefreshIndicator(
+                color: AppColors.lightMint,
+                backgroundColor: const Color(0xFF28292D),
+                onRefresh: () async {
+                  await _fetchAiReport(force: true);
+                },
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                  padding: const EdgeInsets.only(top: 12.0, bottom: 90.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Top App Header
+                      _buildHeader(),
+                      const SizedBox(height: 18),
 
-                    // Title
-                    Text(
-                      'Time For\nYour Ritual',
-                      style: GoogleFonts.outfit(
-                        fontSize: 38,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.white,
-                        height: 1.14,
-                        letterSpacing: 0.2,
+                      // Title
+                      Text(
+                        'Time For\nYour Ritual',
+                        style: GoogleFonts.outfit(
+                          fontSize: 38,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.white,
+                          height: 1.14,
+                          letterSpacing: 0.2,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 18),
+                      const SizedBox(height: 18),
 
-                    // Sub-Navigation Tabs: [일정관리, 기록, 분석결과]
-                    _buildSubTabBar(),
-                    const SizedBox(height: 20),
+                      // Sub-Navigation Tabs: [일정관리, 기록, 분석결과]
+                      _buildSubTabBar(),
+                      const SizedBox(height: 20),
 
-                    // Render Content Based on Selected Sub-Tab
-                    if (_selectedSubTab == 0) ...[
-                      // 일정관리 View
-                      _buildScheduleManagementContent(),
-                    ] else if (_selectedSubTab == 1) ...[
-                      // 기록 View (메인화면_기록화면_3)
-                      _buildRecordTabContent(),
-                    ] else ...[
-                      // 분석결과 View (메인화면_기록화면_4)
-                      _buildAnalysisResultTabContent(),
+                      // Render Content Based on Selected Sub-Tab
+                      if (_selectedSubTab == 0) ...[
+                        // 일정관리 View
+                        _buildScheduleManagementContent(),
+                      ] else if (_selectedSubTab == 1) ...[
+                        // 기록 View (메인화면_기록화면_3)
+                        _buildRecordTabContent(),
+                      ] else ...[
+                        // 분석결과 View (메인화면_기록화면_4)
+                        _buildAnalysisResultTabContent(),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
 
