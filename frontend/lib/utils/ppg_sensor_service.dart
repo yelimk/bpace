@@ -6,7 +6,11 @@ import 'package:camera/camera.dart';
 /// PPG Sensor Measurement Data Result
 class PpgMeasurementResult {
   final int bpm;
+  final int? maxBpm;
+  final int? minBpm;
   final double hrvSdnnMs;
+  final double? maxHrv;
+  final double? minHrv;
   final int breathRpm;
   final double measuredInhaleSec;
   final double measuredExhaleSec;
@@ -19,7 +23,11 @@ class PpgMeasurementResult {
 
   PpgMeasurementResult({
     required this.bpm,
+    this.maxBpm,
+    this.minBpm,
     required this.hrvSdnnMs,
+    this.maxHrv,
+    this.minHrv,
     required this.breathRpm,
     required this.measuredInhaleSec,
     required this.measuredExhaleSec,
@@ -33,7 +41,11 @@ class PpgMeasurementResult {
   /// it — it is a presentation detail, not a measurement.
   factory PpgMeasurementResult.fromServer({
     required double hr,
+    double? maxHr,
+    double? minHr,
     required double hrv,
+    double? maxHrvVal,
+    double? minHrvVal,
     required double? conditionScore,
     required String quality,
   }) {
@@ -41,7 +53,11 @@ class PpgMeasurementResult {
     final breathRpm = (bpm / 5.2).round().clamp(10, 20);
     return PpgMeasurementResult(
       bpm: bpm,
+      maxBpm: maxHr?.round(),
+      minBpm: minHr?.round(),
       hrvSdnnMs: double.parse(hrv.toStringAsFixed(1)),
+      maxHrv: maxHrvVal != null ? double.parse(maxHrvVal.toStringAsFixed(1)) : null,
+      minHrv: minHrvVal != null ? double.parse(minHrvVal.toStringAsFixed(1)) : null,
       breathRpm: breathRpm,
       measuredInhaleSec:
           double.parse((60.0 / breathRpm * 0.42).clamp(1.8, 4.5).toStringAsFixed(1)),

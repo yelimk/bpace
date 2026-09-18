@@ -365,7 +365,11 @@ class _ConditionMeasurementScreenState
       } else {
         _applyResult(PpgMeasurementResult.fromServer(
           hr: (measurement.hr != null && measurement.hr! > 0) ? measurement.hr!.toDouble() : 75.0,
+          maxHr: measurement.maxHr,
+          minHr: measurement.minHr,
           hrv: (measurement.hrv != null && measurement.hrv! > 0) ? measurement.hrv!.toDouble() : 25.0,
+          maxHrvVal: measurement.maxHrv,
+          minHrvVal: measurement.minHrv,
           conditionScore: measurement.conditionScore,
           quality: 'GOOD',
         ));

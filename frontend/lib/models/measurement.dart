@@ -25,7 +25,11 @@ class Measurement {
     required this.quality,
     required this.measuredAt,
     this.hr,
+    this.maxHr,
+    this.minHr,
     this.hrv,
+    this.maxHrv,
+    this.minHrv,
     this.conditionScore,
   });
 
@@ -33,10 +37,13 @@ class Measurement {
 
   /// Beats per minute.
   final double? hr;
+  final double? maxHr;
+  final double? minHr;
 
-  /// RMSSD in milliseconds. This is the number shown as "HRV" in the UI.
-  /// The server also computes SDNN, but keeps it internal as the score input.
+  /// RMSSD/SDNN in milliseconds. This is the number shown as "HRV" in the UI.
   final double? hrv;
+  final double? maxHrv;
+  final double? minHrv;
 
   /// 0–100, **higher is better**. Derived from HRV, so it moves opposite to
   /// heart rate. Needs no personal baseline — it is there on the first reading.
@@ -48,7 +55,11 @@ class Measurement {
   factory Measurement.fromJson(Map<String, dynamic> json) => Measurement(
         id: json['id']?.toString() ?? '0',
         hr: ((json['hr'] ?? json['bpm']) as num?)?.toDouble(),
-        hrv: ((json['hrv'] ?? json['rmssd'] ?? json['sdnn']) as num?)?.toDouble(),
+        maxHr: (json['maxBpm'] as num?)?.toDouble(),
+        minHr: (json['minBpm'] as num?)?.toDouble(),
+        hrv: ((json['hrv'] ?? json['sdnn'] ?? json['rmssd']) as num?)?.toDouble(),
+        maxHrv: (json['maxHrv'] as num?)?.toDouble(),
+        minHrv: (json['minHrv'] as num?)?.toDouble(),
         conditionScore: (json['conditionScore'] as num?)?.toDouble(),
         quality: MeasurementQuality.parse(json['quality'] as String? ?? json['signalQuality'] as String?),
         measuredAt: json['measuredAt'] != null

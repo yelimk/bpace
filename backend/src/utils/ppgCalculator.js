@@ -291,6 +291,10 @@ function processPPGMeasurement(rawSamples, options = {}) {
   let bpm = 72;
   let sdnn = 45.0;
   let rmssd = 35.0;
+  let minBpm = 68;
+  let maxBpm = 76;
+  let minHrv = 40.0;
+  let maxHrv = 50.0;
 
   if (rrIntervals.length >= 3) {
     const meanRR = rrIntervals.reduce((a, b) => a + b, 0) / rrIntervals.length;
@@ -308,6 +312,23 @@ function processPPGMeasurement(rawSamples, options = {}) {
     const count = rrIntervals.length - 1;
     const meanSqDiff = count > 0 ? sumSqDiff / count : 0;
     rmssd = parseFloat(Math.sqrt(meanSqDiff).toFixed(1));
+
+    // 최고/최소 심박수 및 HRV 계산
+    const bpms = rrIntervals.map(rr => Math.round(60000 / rr)).map(b => Math.min(200, Math.max(40, b)));
+    minBpm = Math.min(...bpms);
+    maxBpm = Math.max(...bpms);
+
+    const localHrvs = [];
+    for (let i = 0; i <= rrIntervals.length - 3; i++) {
+      const sub = rrIntervals.slice(i, i + 3);
+      const subMean = sub.reduce((a, b) => a + b, 0) / sub.length;
+      const subSdnn = Math.sqrt(sub.reduce((a, b) => a + Math.pow(b - subMean, 2), 0) / sub.length);
+      localHrvs.push(subSdnn);
+    }
+    if (localHrvs.length > 0) {
+      minHrv = parseFloat(Math.min(...localHrvs).toFixed(1));
+      maxHrv = parseFloat(Math.max(...localHrvs).toFixed(1));
+    }
   }
 
   // NaN 방지 및 안전 보정
@@ -320,6 +341,15 @@ function processPPGMeasurement(rawSamples, options = {}) {
   sdnn = Math.min(200, Math.max(5, sdnn));
   rmssd = Math.min(200, Math.max(5, rmssd));
 
+  if (minBpm === maxBpm || isNaN(minBpm) || isNaN(maxBpm)) {
+    minBpm = Math.max(40, bpm - 4);
+    maxBpm = Math.min(200, bpm + 5);
+  }
+  if (minHrv === maxHrv || isNaN(minHrv) || isNaN(maxHrv)) {
+    minHrv = parseFloat(Math.max(5, sdnn - 5.0).toFixed(1));
+    maxHrv = parseFloat(Math.min(200, sdnn + 6.0).toFixed(1));
+  }
+
   // 5. 컨디션 점수 (0~100점)
   const conditionScore = calculateConditionScore(bpm, rmssd);
 
@@ -328,8 +358,12 @@ function processPPGMeasurement(rawSamples, options = {}) {
 
   return {
     bpm,
+    maxBpm,
+    minBpm,
     sdnn,
     rmssd,
+    maxHrv,
+    minHrv,
     conditionScore,
     signalQuality,
     peakCount: peaks.length,

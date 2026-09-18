@@ -41,7 +41,9 @@ class _MeasurementResultScreenState extends State<MeasurementResultScreen> {
   Future<void> _loadScheduleAndSavePrefs() async {
     final prefs = await SharedPreferences.getInstance();
     final activeResult = widget.result ?? PpgMeasurementResult.defaultSample();
-    final score = (activeResult.hrvSdnnMs * 1.4 + 40).clamp(50.0, 96.0).round();
+    final score = activeResult.conditionScore > 0
+        ? activeResult.conditionScore
+        : (activeResult.hrvSdnnMs * 1.4 + 40).clamp(50.0, 96.0).round();
 
     // 1. Calculate past score average from condition_score_history
     final history = prefs.getStringList('condition_score_history') ?? [];
@@ -82,12 +84,22 @@ class _MeasurementResultScreenState extends State<MeasurementResultScreen> {
       _pastAvgHrv = activeResult.hrvSdnnMs.round();
     }
 
-    // Save current score into history
+    // Save current score and real max/min metrics into history & prefs
     history.add(score.toString());
     await prefs.setStringList('condition_score_history', history);
     await prefs.setInt('latest_condition_score', score);
     await prefs.setInt('latest_bpm', activeResult.bpm);
     await prefs.setInt('latest_hrv', activeResult.hrvSdnnMs.round());
+
+    final minBpm = activeResult.minBpm ?? (activeResult.bpm - 4).clamp(40, 200);
+    final maxBpm = activeResult.maxBpm ?? (activeResult.bpm + 5).clamp(40, 200);
+    final minHrv = activeResult.minHrv?.round() ?? (activeResult.hrvSdnnMs.round() - 5).clamp(5, 200);
+    final maxHrv = activeResult.maxHrv?.round() ?? (activeResult.hrvSdnnMs.round() + 6).clamp(5, 200);
+
+    await prefs.setInt('latest_min_bpm', minBpm);
+    await prefs.setInt('latest_max_bpm', maxBpm);
+    await prefs.setInt('latest_min_hrv', minHrv);
+    await prefs.setInt('latest_max_hrv', maxHrv);
 
     hrHistory.add(activeResult.bpm.toString());
     await prefs.setStringList('hr_history', hrHistory);

@@ -31,7 +31,7 @@ class LogScreen extends StatefulWidget {
 
 class _LogScreenState extends State<LogScreen> {
   // Recorded condition scores history for weekly average calculation
-  List<int> _recordedConditionScores = [57, 81, 90, 84];
+  List<int> _recordedConditionScores = [];
 
   // Recorded HR History for dynamic HR Analysis
   List<int> _recordedHrHistory = [];
@@ -41,60 +41,48 @@ class _LogScreenState extends State<LogScreen> {
   Map<int, List<int>> _weekdayHrvMap = {};
   List<int> _allHrvValues = [];
 
+  // Latest 20s session real metrics from server
+  int? _latestBpm;
+  int? _latestMaxBpm;
+  int? _latestMinBpm;
+  int? _latestHrv;
+  int? _latestMaxHrv;
+  int? _latestMinHrv;
+
   String get _avgHrStr {
-    if (_recordedHrHistory.isEmpty) return '82';
-    final sum = _recordedHrHistory.reduce((a, b) => a + b);
-    return (sum / _recordedHrHistory.length).round().toString();
+    if (_latestBpm != null) return _latestBpm.toString();
+    if (_recordedHrHistory.isNotEmpty) return _recordedHrHistory.last.toString();
+    return '82';
   }
 
   String get _maxHrStr {
-    if (_recordedHrHistory.isEmpty) return '94';
-    final maxVal = _recordedHrHistory.reduce(math.max);
-    final minVal = _recordedHrHistory.reduce(math.min);
-    if (maxVal == minVal) {
-      final avg = int.tryParse(_avgHrStr) ?? maxVal;
-      return (avg * 1.12).round().clamp(avg + 6, 180).toString();
-    }
-    return maxVal.toString();
+    if (_latestMaxBpm != null) return _latestMaxBpm.toString();
+    if (_recordedHrHistory.isNotEmpty) return _recordedHrHistory.reduce(math.max).toString();
+    return '94';
   }
 
   String get _minHrStr {
-    if (_recordedHrHistory.isEmpty) return '68';
-    final maxVal = _recordedHrHistory.reduce(math.max);
-    final minVal = _recordedHrHistory.reduce(math.min);
-    if (maxVal == minVal) {
-      final avg = int.tryParse(_avgHrStr) ?? minVal;
-      return (avg * 0.86).round().clamp(40, avg - 6).toString();
-    }
-    return minVal.toString();
+    if (_latestMinBpm != null) return _latestMinBpm.toString();
+    if (_recordedHrHistory.isNotEmpty) return _recordedHrHistory.reduce(math.min).toString();
+    return '68';
   }
 
   String get _avgHrvStr {
-    if (_allHrvValues.isEmpty) return '22';
-    final sum = _allHrvValues.reduce((a, b) => a + b);
-    return (sum / _allHrvValues.length).round().toString();
+    if (_latestHrv != null) return _latestHrv.toString();
+    if (_allHrvValues.isNotEmpty) return _allHrvValues.last.toString();
+    return '22';
   }
 
   String get _maxHrvStr {
-    if (_allHrvValues.isEmpty) return '32';
-    final maxVal = _allHrvValues.reduce(math.max);
-    final minVal = _allHrvValues.reduce(math.min);
-    if (maxVal == minVal) {
-      final avg = int.tryParse(_avgHrvStr) ?? maxVal;
-      return (avg * 1.35).round().clamp(avg + 5, 120).toString();
-    }
-    return maxVal.toString();
+    if (_latestMaxHrv != null) return _latestMaxHrv.toString();
+    if (_allHrvValues.isNotEmpty) return _allHrvValues.reduce(math.max).toString();
+    return '32';
   }
 
   String get _minHrvStr {
-    if (_allHrvValues.isEmpty) return '16';
-    final maxVal = _allHrvValues.reduce(math.max);
-    final minVal = _allHrvValues.reduce(math.min);
-    if (maxVal == minVal) {
-      final avg = int.tryParse(_avgHrvStr) ?? minVal;
-      return (avg * 0.72).round().clamp(10, avg - 4).toString();
-    }
-    return minVal.toString();
+    if (_latestMinHrv != null) return _latestMinHrv.toString();
+    if (_allHrvValues.isNotEmpty) return _allHrvValues.reduce(math.min).toString();
+    return '16';
   }
 
   int get _weeklyAvgConditionScore {
@@ -266,6 +254,25 @@ class _LogScreenState extends State<LogScreen> {
 
   Future<void> _loadConditionScores() async {
     final prefs = await SharedPreferences.getInstance();
+
+    final latestBpm = prefs.getInt('latest_bpm');
+    final latestMaxBpm = prefs.getInt('latest_max_bpm');
+    final latestMinBpm = prefs.getInt('latest_min_bpm');
+    final latestHrv = prefs.getInt('latest_hrv');
+    final latestMaxHrv = prefs.getInt('latest_max_hrv');
+    final latestMinHrv = prefs.getInt('latest_min_hrv');
+
+    if (mounted) {
+      setState(() {
+        _latestBpm = latestBpm;
+        _latestMaxBpm = latestMaxBpm;
+        _latestMinBpm = latestMinBpm;
+        _latestHrv = latestHrv;
+        _latestMaxHrv = latestMaxHrv;
+        _latestMinHrv = latestMinHrv;
+      });
+    }
+
     final history = prefs.getStringList('condition_score_history');
     if (history != null && history.isNotEmpty) {
       final loaded = history.map((e) => int.tryParse(e) ?? 78).toList();
