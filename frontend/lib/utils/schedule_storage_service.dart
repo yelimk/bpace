@@ -61,6 +61,50 @@ class ScheduleStorageService {
     ];
   }
 
+  /// Parse time string (e.g. '오전 9:00', '오전 11:30', '오후 2:30') into minutes from midnight (0~1439)
+  static int parseTimeToMinutes(String? timeStr) {
+    if (timeStr == null || timeStr.trim().isEmpty) return 9999;
+    final str = timeStr.trim();
+    bool isPM = str.contains('오후') || str.toUpperCase().contains('PM');
+    bool isAM = str.contains('오전') || str.toUpperCase().contains('AM');
+
+    final parts = str.replaceAll(RegExp(r'[^\d:]'), '').split(':');
+    if (parts.isEmpty || parts[0].isEmpty) return 9999;
+
+    int hour = int.tryParse(parts[0]) ?? 0;
+    int minute = parts.length > 1 ? (int.tryParse(parts[1]) ?? 0) : 0;
+
+    if (isPM && hour < 12) {
+      hour += 12;
+    } else if (isAM && hour == 12) {
+      hour = 0;
+    }
+
+    return hour * 60 + minute;
+  }
+
+  /// Sorts schedules list chronologically by date and time (AM -> PM)
+  static void sortSchedules(List<Map<String, dynamic>> schedules) {
+    schedules.sort((a, b) {
+      final dateA = a['date'];
+      final dateB = b['date'];
+
+      DateTime? dtA = dateA is DateTime ? dateA : (dateA is String ? DateTime.tryParse(dateA) : null);
+      DateTime? dtB = dateB is DateTime ? dateB : (dateB is String ? DateTime.tryParse(dateB) : null);
+
+      if (dtA != null && dtB != null) {
+        final dateOnlyA = DateTime(dtA.year, dtA.month, dtA.day);
+        final dateOnlyB = DateTime(dtB.year, dtB.month, dtB.day);
+        final dateComp = dateOnlyA.compareTo(dateOnlyB);
+        if (dateComp != 0) return dateComp;
+      }
+
+      final timeA = parseTimeToMinutes(a['time'] as String?);
+      final timeB = parseTimeToMinutes(b['time'] as String?);
+      return timeA.compareTo(timeB);
+    });
+  }
+
   /// Load all schedules from SharedPreferences
   static Future<List<Map<String, dynamic>>> loadSchedules() async {
     final prefs = await SharedPreferences.getInstance();
@@ -87,6 +131,7 @@ class ScheduleStorageService {
       }
     }
 
+    sortSchedules(_cachedSchedules!);
     return List<Map<String, dynamic>>.from(_cachedSchedules!);
   }
 
@@ -101,6 +146,7 @@ class ScheduleStorageService {
     newSchedule['isCompleted'] = false; // Always false when newly created!
 
     current.add(newSchedule);
+    sortSchedules(current);
     _cachedSchedules = current;
     await _saveToPrefs();
     _scheduleReminderIfValid(newSchedule);
@@ -136,6 +182,7 @@ class ScheduleStorageService {
         break;
       }
     }
+    sortSchedules(current);
     _cachedSchedules = current;
     await _saveToPrefs();
   }

@@ -239,6 +239,8 @@ class _LogScreenState extends State<LogScreen> {
       } catch (_) {}
     }
 
+    ScheduleStorageService.sortSchedules(combined);
+
     if (!mounted) return;
     setState(() {
       _schedules = combined;

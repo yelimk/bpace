@@ -48,6 +48,23 @@ class BreathingRoutineModel {
     required this.targetHold2,
   });
 
+  /// 마이페이지 / 리추얼 기록 등 단순화 표기용 명칭 (예: "4-4-4-4 호흡", "5-5 호흡", "생리학적 한숨")
+  String get shortTitle {
+    if (type == BreathingRoutineType.physiologicalSigh || title.contains('생리학적 한숨')) {
+      return '생리학적 한숨';
+    }
+    if (type == BreathingRoutineType.resonance55 || title.contains('5.5') || title.contains('공진')) {
+      return '5-5 호흡';
+    }
+    final match = RegExp(r'^(\d+(?:\.\d+)?(?:-\d+(?:\.\d+)?)+)').firstMatch(title);
+    if (match != null) {
+      String tempo = match.group(1)!;
+      if (tempo == '5.5-5.5') tempo = '5-5';
+      return '$tempo 호흡';
+    }
+    return title;
+  }
+
   // 초당 총 호흡 1주기 시간 (초 단위)
   double get cycleDurationSec => targetInhale + targetHold1 + targetExhale + targetHold2;
 

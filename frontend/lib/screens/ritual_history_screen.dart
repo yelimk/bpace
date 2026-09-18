@@ -53,6 +53,22 @@ class RitualMonthGroup {
   });
 }
 
+String formatRoutineNameForHistory(String name) {
+  if (name.contains('생리학적 한숨')) {
+    return '생리학적 한숨';
+  }
+  if (name.contains('5.5') || name.contains('공진')) {
+    return '5-5 호흡';
+  }
+  final match = RegExp(r'^(\d+(?:\.\d+)?(?:-\d+(?:\.\d+)?)+)').firstMatch(name);
+  if (match != null) {
+    String tempo = match.group(1)!;
+    if (tempo == '5.5-5.5') tempo = '5-5';
+    return '$tempo 호흡';
+  }
+  return name;
+}
+
 class RitualHistoryScreen extends StatefulWidget {
   final int initialTabIndex;
 
@@ -90,13 +106,7 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
     return null;
   }
 
-  List<RitualRecordItem> get _defaultThisWeekRecords {
-    final monday = _getThisWeekMonday();
-    final y = monday.year;
-    final m = monday.month.toString().padLeft(2, '0');
-    final d = monday.day.toString().padLeft(2, '0');
-    final datePrefix = '$y.$m.$d';
-
+  List<RitualRecordItem> _buildDefaultRecords(String datePrefix) {
     return [
       RitualRecordItem(
         title: '4-7-8 호흡',
@@ -161,35 +171,15 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
   void initState() {
     super.initState();
     _selectedTabIndex = widget.initialTabIndex;
-    _thisWeekRecords = List.from(_defaultThisWeekRecords);
+    final mon = _getThisWeekMonday();
+    final datePrefix = '${mon.year}.${mon.month.toString().padLeft(2, '0')}.${mon.day.toString().padLeft(2, '0')}';
+    final initialDefaults = _buildDefaultRecords(datePrefix);
+    _thisWeekRecords = List.from(initialDefaults);
     _monthGroups = [
       RitualMonthGroup(
-        monthHeader: '2026년 9월',
+        monthHeader: '${mon.year}년 ${mon.month}월',
         isExpanded: true,
-        items: List.from(_defaultThisWeekRecords),
-      ),
-      RitualMonthGroup(
-        monthHeader: '2026년 8월',
-        isExpanded: false,
-        items: const [
-          RitualRecordItem(
-            title: '4-7-8 호흡',
-            timestamp: '2026.08.28 오후 9:15',
-            bgImagePath: 'assets/images/bg_breath_478.png',
-            inhaleSec: 4.0,
-            holdSec: 7.0,
-            exhaleSec: 8.0,
-          ),
-              RitualRecordItem(
-                title: '4-2-4-2 호흡',
-                timestamp: '2026.08.15 오후 2:40',
-                bgImagePath: 'assets/images/bg_breath_semi_box.png',
-                inhaleSec: 4.0,
-                holdSec: 2.0,
-                exhaleSec: 4.0,
-                hold2Sec: 2.0,
-              ),
-        ],
+        items: List.from(initialDefaults),
       ),
     ];
     _loadSavedRecords();
@@ -201,6 +191,50 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
 
     final thisWeekMon = _getThisWeekMonday();
     final thisWeekSun = DateTime(thisWeekMon.year, thisWeekMon.month, thisWeekMon.day + 6, 23, 59, 59);
+
+    final y = thisWeekMon.year;
+    final m = thisWeekMon.month.toString().padLeft(2, '0');
+    final d = thisWeekMon.day.toString().padLeft(2, '0');
+    final currentMonStr = '$y.$m.$d';
+
+    String? anchorMonStr = prefs.getString('initial_dummy_anchor_monday_v1');
+    if (anchorMonStr == null) {
+      anchorMonStr = currentMonStr;
+      await prefs.setString('initial_dummy_anchor_monday_v1', anchorMonStr);
+    }
+
+    final defaultRecords = _buildDefaultRecords(anchorMonStr);
+
+    final List<RitualRecordItem> augustDefaults = const [
+      RitualRecordItem(
+        title: '4-7-8 호흡',
+        timestamp: '2026.08.28 오후 9:15',
+        bgImagePath: 'assets/images/bg_breath_478.png',
+        durationString: '05:04',
+        cycleCount: 16,
+        aiHeadline: '깊은 이완과 함께 완벽한 숙면 준비를 마쳤어요',
+        aiQuote: '내쉬는 숨마다 하루의 고단함이 아득히 멀어집니다.',
+        aiFeedbackText: '4-7-8 호흡은 자율신경계 부교감신경을 집중 활성화하는 수면 유도 기법입니다. 날숨을 길게 유지하여 교감신경의 긴장을 완화하고 깊은 수면 상태로의 전환을 효과적으로 도와줍니다.',
+        inhaleSec: 4.0,
+        holdSec: 7.0,
+        exhaleSec: 8.0,
+        isAdaptiveRamp: true,
+      ),
+      RitualRecordItem(
+        title: '4-2-4-2 호흡',
+        timestamp: '2026.08.15 오후 2:40',
+        bgImagePath: 'assets/images/bg_breath_semi_box.png',
+        durationString: '04:00',
+        cycleCount: 15,
+        aiHeadline: '세미 박스 호흡으로 오후의 집중력을 가볍게 되찾았어요',
+        aiQuote: '짧은 리듬 속에서 흐트러졌던 마음의 평정을 다시 고쳐잡습니다.',
+        aiFeedbackText: '4-2-4-2 세미 박스 호흡은 박스 호흡의 경량화 버전으로, 짧은 멈춤 시간을 통해 일상의 긴장감을 해소하고 오후 몰입력을 빠르게 회복하도록 돕습니다.',
+        inhaleSec: 4.0,
+        holdSec: 2.0,
+        exhaleSec: 4.0,
+        hold2Sec: 2.0,
+      ),
+    ];
 
     final List<RitualRecordItem> thisWeekDynamicItems = [];
     final List<RitualRecordItem> allDynamicItems = [];
@@ -228,51 +262,45 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
       } catch (_) {}
     }
 
-    // Check default sample items for this week as well
-    for (final item in _defaultThisWeekRecords) {
+    // Check default sample items against current week range
+    for (final item in defaultRecords) {
       final dt = _parseRecordDate(null, item.timestamp);
       if (dt != null && !dt.isBefore(thisWeekMon) && !dt.isAfter(thisWeekSun)) {
         thisWeekDynamicItems.add(item);
       }
     }
 
-    final currentMonthStr = '${DateTime.now().year}년 ${DateTime.now().month}월';
-    final allMonthItems = [...allDynamicItems, ..._defaultThisWeekRecords];
+    // Dynamic month grouping for all records (allDynamicItems + defaultRecords + augustDefaults)
+    final allItemsList = [...allDynamicItems, ...defaultRecords, ...augustDefaults];
+    final Map<String, List<RitualRecordItem>> monthGroupMap = {};
+
+    for (final item in allItemsList) {
+      final dt = _parseRecordDate(null, item.timestamp);
+      final monthKey = dt != null
+          ? '${dt.year}년 ${dt.month.toString().padLeft(2, '0')}월'
+          : '${DateTime.now().year}년 ${DateTime.now().month.toString().padLeft(2, '0')}월';
+      monthGroupMap.putIfAbsent(monthKey, () => []).add(item);
+    }
+
+    // Sort month keys in descending order (e.g. 2026년 10월 -> 2026년 09월 -> 2026년 08월)
+    final sortedMonthKeys = monthGroupMap.keys.toList()
+      ..sort((a, b) => b.compareTo(a));
+
+    final currentMonthKey = '${DateTime.now().year}년 ${DateTime.now().month.toString().padLeft(2, '0')}월';
+
+    final dynamicMonthGroups = sortedMonthKeys.map((key) {
+      final formattedKey = key.replaceAll('년 0', '년 ').replaceAll('월', '월');
+      return RitualMonthGroup(
+        monthHeader: formattedKey,
+        isExpanded: key == currentMonthKey || key == sortedMonthKeys.first,
+        items: monthGroupMap[key]!,
+      );
+    }).toList();
 
     if (mounted) {
       setState(() {
         _thisWeekRecords = thisWeekDynamicItems;
-        _monthGroups = [
-          RitualMonthGroup(
-            monthHeader: currentMonthStr,
-            isExpanded: true,
-            items: allMonthItems,
-          ),
-          RitualMonthGroup(
-            monthHeader: '2026년 8월',
-            isExpanded: false,
-            items: const [
-              RitualRecordItem(
-                title: '4-7-8 호흡',
-                timestamp: '2026.08.28 오후 9:15',
-                bgImagePath: 'assets/images/bg_breath_478.png',
-                inhaleSec: 4.0,
-                holdSec: 7.0,
-                exhaleSec: 8.0,
-                isAdaptiveRamp: true,
-              ),
-              RitualRecordItem(
-                title: '4-2-4-2 호흡',
-                timestamp: '2026.08.15 오후 2:40',
-                bgImagePath: 'assets/images/bg_breath_semi_box.png',
-                inhaleSec: 4.0,
-                holdSec: 2.0,
-                exhaleSec: 4.0,
-                hold2Sec: 2.0,
-              ),
-            ],
-          ),
-        ];
+        _monthGroups = dynamicMonthGroups;
       });
     }
   }
@@ -522,7 +550,7 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item.title,
+                    formatRoutineNameForHistory(item.title),
                     style: const TextStyle(
                       fontFamily: AppFonts.pretendard,
                       fontSize: 16,
@@ -539,13 +567,17 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
                         color: AppColors.slateGray,
                       ),
                       const SizedBox(width: 5),
-                      Text(
-                        item.timestamp,
-                        style: const TextStyle(
-                          fontFamily: AppFonts.pretendard,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.slateGray,
+                      Expanded(
+                        child: Text(
+                          item.timestamp,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          style: const TextStyle(
+                            fontFamily: AppFonts.pretendard,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                            color: AppColors.slateGray,
+                          ),
                         ),
                       ),
                     ],

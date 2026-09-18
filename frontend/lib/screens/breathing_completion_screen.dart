@@ -493,20 +493,7 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
 
                           // Single Unified Integrated Glass Pill Bar Button matching recommended screen
                           GestureDetector(
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => BreathingExerciseScreen(
-                                    title: widget.title,
-                                    bgImagePath: widget.bgImagePath,
-                                    isAdaptiveRamp: widget.isAdaptiveRamp,
-                                    initialInhaleSec: widget.isAdaptiveRamp ? 2.8 : null,
-                                    initialExhaleSec: widget.isAdaptiveRamp ? 3.4 : null,
-                                    fromSource: widget.fromSource,
-                                  ),
-                                ),
-                              );
-                            },
+                            onTap: null,
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(24),
                               child: Container(

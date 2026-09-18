@@ -59,8 +59,19 @@ class _MyPageScreenState extends State<MyPageScreen> {
     final thisWeekMon = _getThisWeekMonday();
     final thisWeekSun = DateTime(thisWeekMon.year, thisWeekMon.month, thisWeekMon.day + 6, 23, 59, 59);
 
-    final thisWeekMonStr = thisWeekMon.toIso8601String().substring(0, 10);
-    final storedWeekStr = prefs.getString('weekly_ritual_reset_monday');
+    final y = thisWeekMon.year;
+    final m = thisWeekMon.month.toString().padLeft(2, '0');
+    final d = thisWeekMon.day.toString().padLeft(2, '0');
+    final currentMonStr = '$y.$m.$d';
+
+    String? anchorMonStr = prefs.getString('initial_dummy_anchor_monday_v1');
+    if (anchorMonStr == null) {
+      anchorMonStr = currentMonStr;
+      await prefs.setString('initial_dummy_anchor_monday_v1', anchorMonStr);
+    }
+
+    final isAnchorWeek = (anchorMonStr == currentMonStr);
+    final dummyBaseCount = isAnchorWeek ? 4 : 0;
 
     int thisWeekDynamicCount = 0;
     for (final raw in savedJsonList) {
@@ -73,12 +84,14 @@ class _MyPageScreenState extends State<MyPageScreen> {
       } catch (_) {}
     }
 
-    final baseCount = 4 + thisWeekDynamicCount;
+    final baseCount = dummyBaseCount + thisWeekDynamicCount;
     int count;
-    if (storedWeekStr != thisWeekMonStr) {
-      // Week changed! Reset weekly ritual count to baseline 4 + new dynamic items
+    final thisWeekMonIso = thisWeekMon.toIso8601String().substring(0, 10);
+    final storedWeekStr = prefs.getString('weekly_ritual_reset_monday');
+
+    if (storedWeekStr != thisWeekMonIso) {
       count = baseCount;
-      await prefs.setString('weekly_ritual_reset_monday', thisWeekMonStr);
+      await prefs.setString('weekly_ritual_reset_monday', thisWeekMonIso);
       await prefs.setInt('weekly_ritual_count', count);
     } else {
       final savedCount = prefs.getInt('weekly_ritual_count');
