@@ -1542,42 +1542,75 @@ class _LogScreenState extends State<LogScreen> {
     );
   }
 
-  void _openCompletedRitualFeedback(Map<String, dynamic> schedule) {
-    final title = schedule['title'] as String? ?? '맞춤 호흡';
+  Future<void> _openCompletedRitualFeedback(Map<String, dynamic> schedule) async {
+    final scheduleId = schedule['id'] as String?;
+    final title = schedule['title'] as String? ?? '';
 
-    String routineName = schedule['routineName'] as String? ?? '4-7-8 호흡';
-    String durationString = schedule['durationString'] as String? ?? '05:04';
-    int cycleCount = schedule['cycleCount'] as int? ?? 4;
-    String bgImagePath = schedule['bgImagePath'] as String? ?? 'assets/images/bg_breath_478.png';
+    String? routineName = schedule['routineName'] as String?;
+    String? durationString = schedule['durationString'] as String?;
+    int? cycleCount = schedule['cycleCount'] as int?;
+    String? bgImagePath = schedule['bgImagePath'] as String?;
     String? aiHeadline = schedule['aiHeadline'] as String?;
     String? aiQuote = schedule['aiQuote'] as String?;
     String? aiFeedbackText = schedule['aiFeedbackText'] as String?;
 
-    if (title.contains('졸업논문') || title.contains('심사')) {
-      routineName = schedule['routineName'] as String? ?? '생리학적 한숨';
-      durationString = schedule['durationString'] as String? ?? '03:15';
-      cycleCount = schedule['cycleCount'] as int? ?? 20;
-      bgImagePath = schedule['bgImagePath'] as String? ?? 'assets/images/bg_breath_sigh.png';
-      aiHeadline ??= '졸업논문 심사 전, 생리학적 한숨으로 긴장을 완화했어요';
-      aiQuote ??= '"두 번의 짧은 들이쉼과 긴 내쉼으로, 마음에 신선한 여유가 차오릅니다."';
-      aiFeedbackText ??= '생리학적 한숨은 폐포를 활짝 열어 뇌에 즉각적인 산소를 공급하고 급격한 자율신경계 긴장을 수 초 내에 가라앉히는 가장 빠른 리셋 호흡입니다.';
-    } else if (title.contains('발표') || title.contains('세미나')) {
-      routineName = schedule['routineName'] as String? ?? '4-7-8 호흡';
-      durationString = schedule['durationString'] as String? ?? '05:04';
-      cycleCount = schedule['cycleCount'] as int? ?? 16;
-      bgImagePath = schedule['bgImagePath'] as String? ?? 'assets/images/bg_breath_478.png';
+    // 1. Try to fetch matching saved ritual history from SharedPreferences
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final historyList = prefs.getStringList('saved_ritual_history_v1') ?? [];
+
+      for (final raw in historyList) {
+        final decoded = jsonDecode(raw) as Map<String, dynamic>;
+        final hScheduleId = decoded['scheduleId'] as String?;
+        final hScheduleTitle = decoded['scheduleTitle'] as String?;
+
+        if ((scheduleId != null && hScheduleId == scheduleId) ||
+            (title.isNotEmpty && hScheduleTitle == title)) {
+          routineName ??= decoded['title'] as String? ?? decoded['routineName'] as String?;
+          durationString ??= decoded['durationString'] as String?;
+          cycleCount ??= decoded['cycleCount'] as int?;
+          bgImagePath ??= decoded['bgImagePath'] as String?;
+          aiHeadline ??= decoded['aiHeadline'] as String?;
+          aiQuote ??= decoded['aiQuote'] as String?;
+          aiFeedbackText ??= decoded['aiFeedbackText'] as String?;
+          break;
+        }
+      }
+    } catch (e) {
+      debugPrint('[LogScreen] Error reading saved ritual history: $e');
+    }
+
+    // 2. Fixed sample fallback ONLY for default_1 and default_2 if not measured yet
+    if (scheduleId == 'default_1' || (title.contains('발표') && scheduleId?.startsWith('default_') == true)) {
+      routineName ??= '4-7-8 호흡';
+      durationString ??= '05:04';
+      cycleCount ??= 16;
+      bgImagePath ??= 'assets/images/bg_breath_478.png';
       aiHeadline ??= '전공 세미나 발표 전, 5분간의 4-7-8 호흡으로 완벽한 마인드셋을 갖췄어요';
       aiQuote ??= '"깊은 숨을 내쉴 때마다 마음에 쌓인 부담은 아득히 멀어집니다."';
       aiFeedbackText ??= '4-7-8 호흡은 날숨을 길게 유지하여 부교감신경을 활성화하는 데 탁월한 리듬이에요. 발표 전 복잡했던 머릿속을 차분하게 가라앉히고 긴장감을 진정시켰습니다.';
+    } else if (scheduleId == 'default_2' || (title.contains('심사') && scheduleId?.startsWith('default_') == true)) {
+      routineName ??= '생리학적 한숨';
+      durationString ??= '03:15';
+      cycleCount ??= 20;
+      bgImagePath ??= 'assets/images/bg_breath_sigh.png';
+      aiHeadline ??= '졸업논문 심사 전, 생리학적 한숨으로 긴장을 완화했어요';
+      aiQuote ??= '"두 번의 짧은 들이쉼과 긴 내쉼으로, 마음에 신선한 여유가 차오릅니다."';
+      aiFeedbackText ??= '생리학적 한숨은 폐포를 활짝 열어 뇌에 즉각적인 산소를 공급하고 급격한 자율신경계 긴장을 수 초 내에 가라앉히는 가장 빠른 리셋 호흡입니다.';
     }
+
+    // If still no valid routine/feedback found for a real schedule, do not open dummy!
+    if (routineName == null || routineName.isEmpty) return;
+
+    if (!mounted) return;
 
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => BreathingCompletionScreen(
-          title: routineName,
-          bgImagePath: bgImagePath,
-          durationString: durationString,
-          cycleCount: cycleCount,
+          title: routineName!,
+          bgImagePath: bgImagePath ?? 'assets/images/bg_breath_478.png',
+          durationString: durationString ?? '05:04',
+          cycleCount: cycleCount ?? 4,
           initialHeadline: aiHeadline,
           initialQuote: aiQuote,
           initialFeedbackText: aiFeedbackText,

@@ -70,7 +70,16 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
     }
 
     if (widget.targetScheduleId != null && widget.targetScheduleId!.isNotEmpty) {
-      ScheduleStorageService.completeSchedule(widget.targetScheduleId);
+      ScheduleStorageService.completeSchedule(
+        widget.targetScheduleId,
+        routineName: widget.title,
+        durationString: widget.durationString,
+        cycleCount: widget.cycleCount,
+        bgImagePath: widget.bgImagePath,
+        aiHeadline: widget.initialHeadline,
+        aiQuote: widget.initialQuote,
+        aiFeedbackText: widget.initialFeedbackText,
+      );
     }
   }
 
@@ -116,6 +125,18 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
   }
 
   Future<void> _updateSavedRecordWithAi(BreathingFeedback feedback) async {
+    if (widget.targetScheduleId != null && widget.targetScheduleId!.isNotEmpty) {
+      await ScheduleStorageService.completeSchedule(
+        widget.targetScheduleId,
+        routineName: widget.title,
+        durationString: widget.durationString,
+        cycleCount: widget.cycleCount,
+        bgImagePath: widget.bgImagePath,
+        aiHeadline: feedback.headline,
+        aiQuote: feedback.todaysQuote,
+        aiFeedbackText: feedback.feedbackText,
+      );
+    }
     if (!widget.isAlreadySaved) return;
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -125,7 +146,9 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
 
       for (final raw in historyList) {
         final decoded = jsonDecode(raw) as Map<String, dynamic>;
-        if (!updated && decoded['title'] == widget.title && (decoded['aiQuote'] == null || (decoded['aiQuote'] as String).isEmpty)) {
+        if (!updated &&
+            (decoded['scheduleId'] == widget.targetScheduleId || decoded['title'] == widget.title) &&
+            (decoded['aiQuote'] == null || (decoded['aiQuote'] as String).isEmpty)) {
           decoded['aiHeadline'] = feedback.headline;
           decoded['aiQuote'] = feedback.todaysQuote;
           decoded['aiFeedbackText'] = feedback.feedbackText;
@@ -138,7 +161,9 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
       if (updated) {
         await prefs.setStringList('saved_ritual_history_v1', updatedList);
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('[BreathingCompletionScreen] Save record update error: $e');
+    }
   }
 
   String _getRoutineIdByTitle(String title) {
@@ -199,6 +224,8 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
 
       final recordMap = {
         'title': widget.title,
+        'scheduleId': widget.targetScheduleId,
+        'scheduleTitle': widget.targetScheduleId,
         'timestamp': timestampStr,
         'isoDate': now.toIso8601String(),
         'bgImagePath': widget.bgImagePath,

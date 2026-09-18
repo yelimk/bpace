@@ -153,7 +153,16 @@ class ScheduleStorageService {
   }
 
   /// Complete a schedule by title or ID (when breathing ritual is completed via schedule flow)
-  static Future<void> completeSchedule(String? titleOrId) async {
+  static Future<void> completeSchedule(
+    String? titleOrId, {
+    String? routineName,
+    String? durationString,
+    int? cycleCount,
+    String? bgImagePath,
+    String? aiHeadline,
+    String? aiQuote,
+    String? aiFeedbackText,
+  }) async {
     if (titleOrId == null || titleOrId.trim().isEmpty) return;
 
     final current = await loadSchedules();
@@ -161,6 +170,13 @@ class ScheduleStorageService {
     for (var s in current) {
       if (s['id'] == titleOrId || s['title'] == titleOrId) {
         s['isCompleted'] = true;
+        if (routineName != null) s['routineName'] = routineName;
+        if (durationString != null) s['durationString'] = durationString;
+        if (cycleCount != null) s['cycleCount'] = cycleCount;
+        if (bgImagePath != null) s['bgImagePath'] = bgImagePath;
+        if (aiHeadline != null) s['aiHeadline'] = aiHeadline;
+        if (aiQuote != null) s['aiQuote'] = aiQuote;
+        if (aiFeedbackText != null) s['aiFeedbackText'] = aiFeedbackText;
         updated = true;
       }
     }
