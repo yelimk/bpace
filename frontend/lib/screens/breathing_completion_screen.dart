@@ -818,9 +818,11 @@ class _BreathingCompletionScreenState extends State<BreathingCompletionScreen> {
       );
     }
 
-    final subheader = _aiFeedback!.todaysQuote.isNotEmpty
-        ? '"${_aiFeedback!.todaysQuote}"'
-        : (_aiFeedback!.headline.isNotEmpty ? '"${_aiFeedback!.headline}"' : '');
+    String rawQuote = _aiFeedback!.todaysQuote.isNotEmpty
+        ? _aiFeedback!.todaysQuote
+        : (_aiFeedback!.headline.isNotEmpty ? _aiFeedback!.headline : '');
+    rawQuote = rawQuote.replaceAll(RegExp(r'^"+|"+$'), '').trim();
+    final subheader = rawQuote.isNotEmpty ? '"$rawQuote"' : '';
 
     final bodyAnalysis = _aiFeedback!.feedbackText;
 
