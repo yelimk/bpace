@@ -10,6 +10,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await ApiClient.instance.restoreSession();
+    // 백그라운드로 Render 서버 헬스체크(/api/health) 핑을 미리 날려 수면(Sleep) 상태의 서버를 웜업!
+    ApiClient.instance.get('/api/health').catchError((_) {});
   } catch (e) {
     debugPrint('Session restore skipped: $e');
   }

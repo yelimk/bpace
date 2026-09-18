@@ -98,39 +98,70 @@ class ApiClient {
     Map<String, String>? query,
     Object? body,
     Duration? timeout,
+    int maxRetries = 3,
   }) async {
     final uri = Uri.parse('${ApiConfig.baseUrl}$path')
         .replace(queryParameters: query?.isEmpty ?? true ? null : query);
 
-    final request = http.Request(method, uri);
-    request.headers['Accept'] = 'application/json';
-    if (_accessToken != null) {
-      request.headers['Authorization'] = 'Bearer $_accessToken';
-    }
-    if (body != null) {
-      // charset must be spelled out. Nicknames and error messages are Korean,
-      // and without it some proxies fall back to latin-1 and mangle them.
-      request.headers['Content-Type'] = 'application/json; charset=utf-8';
-      request.bodyBytes = utf8.encode(jsonEncode(body));
+    Object? lastException;
+
+    for (int attempt = 1; attempt <= maxRetries; attempt++) {
+      final request = http.Request(method, uri);
+      request.headers['Accept'] = 'application/json';
+      if (_accessToken != null) {
+        request.headers['Authorization'] = 'Bearer $_accessToken';
+      }
+      if (body != null) {
+        // charset must be spelled out. Nicknames and error messages are Korean,
+        // and without it some proxies fall back to latin-1 and mangle them.
+        request.headers['Content-Type'] = 'application/json; charset=utf-8';
+        request.bodyBytes = utf8.encode(jsonEncode(body));
+      }
+
+      try {
+        final streamed =
+            await request.send().timeout(timeout ?? ApiConfig.timeout);
+        final response = await http.Response.fromStream(streamed);
+
+        // If Render server returns 503 while cold starting, retry up to maxRetries
+        if (response.statusCode == 503 && attempt < maxRetries) {
+          await Future.delayed(Duration(seconds: attempt * 2));
+          continue;
+        }
+
+        return _unwrap(response);
+      } on TimeoutException catch (e) {
+        lastException = e;
+        if (attempt < maxRetries) {
+          await Future.delayed(Duration(seconds: attempt * 2));
+          continue;
+        }
+      } on SocketException catch (e) {
+        lastException = e;
+        if (attempt < maxRetries) {
+          await Future.delayed(Duration(seconds: attempt * 2));
+          continue;
+        }
+      } on http.ClientException catch (e) {
+        lastException = e;
+        if (attempt < maxRetries) {
+          await Future.delayed(Duration(seconds: attempt * 2));
+          continue;
+        }
+      }
     }
 
-    final http.Response response;
-    try {
-      final streamed =
-          await request.send().timeout(timeout ?? ApiConfig.timeout);
-      response = await http.Response.fromStream(streamed);
-    } on TimeoutException {
+    if (lastException is TimeoutException) {
       throw const ApiException(
           ApiException.timeout, '서버 응답이 없어요. 잠시 후 다시 시도해 주세요.');
-    } on SocketException {
-      throw const ApiException(
-          ApiException.networkError, '네트워크에 연결할 수 없어요. 연결 상태를 확인해 주세요.');
-    } on http.ClientException {
+    } else if (lastException is SocketException ||
+        lastException is http.ClientException) {
       throw const ApiException(
           ApiException.networkError, '네트워크에 연결할 수 없어요. 연결 상태를 확인해 주세요.');
     }
 
-    return _unwrap(response);
+    throw const ApiException(
+        ApiException.timeout, '서버 응답이 없어요. 잠시 후 다시 시도해 주세요.');
   }
 
   dynamic _unwrap(http.Response response) {
@@ -154,6 +185,10 @@ class ApiClient {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         // 204 and friends. Nothing to hand back.
         return null;
+      }
+      if (response.statusCode == 503) {
+        throw const ApiException(ApiException.aiServiceUnavailable,
+            '현재 AI 분석을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.');
       }
       throw ApiException(ApiException.malformedResponse,
           '서버 응답을 이해할 수 없어요. (HTTP ${response.statusCode})');

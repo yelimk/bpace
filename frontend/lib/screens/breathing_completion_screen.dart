@@ -8,7 +8,6 @@ import '../utils/responsive.dart';
 import '../utils/schedule_storage_service.dart';
 import '../services/api_client.dart';
 import '../services/report_service.dart';
-import 'breathing_exercise_screen.dart';
 import 'home_screen.dart';
 
 /// Breathing Completion Screen (Ritual Feedback - 스크롤 가능한 호흡 종료 피드백 화면)

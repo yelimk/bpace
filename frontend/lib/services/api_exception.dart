@@ -26,13 +26,17 @@ class ApiException implements Exception {
   static const String networkError = 'NETWORK_ERROR';
   static const String timeout = 'TIMEOUT';
   static const String malformedResponse = 'MALFORMED_RESPONSE';
+  static const String aiServiceUnavailable = 'AI_SERVICE_UNAVAILABLE';
 
   /// True when the session is gone and the user has to sign in again.
   bool get requiresLogin => code == unauthorized;
 
   /// True when retrying the same request might succeed.
   bool get isTransient =>
-      code == networkError || code == timeout || code == reportUnavailable;
+      code == networkError ||
+      code == timeout ||
+      code == reportUnavailable ||
+      code == aiServiceUnavailable;
 
   @override
   String toString() => 'ApiException($code): $message';
