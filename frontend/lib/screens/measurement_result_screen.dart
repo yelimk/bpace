@@ -122,49 +122,62 @@ class _MeasurementResultScreenState extends State<MeasurementResultScreen> {
     newHrvHistory.add('$isoNow|$weekday:$hrvVal');
     await prefs.setStringList('hrv_history_v2', newHrvHistory);
 
-    // 2. Load today's upcoming schedule closest to current time (irrespective of isCompleted)
+    // 2. Load schedule for result card (Priority 1: Explicit targetScheduleId via '준비하기', Priority 2: Closest upcoming schedule today)
     final now = DateTime.now();
     final allSchedules = await ScheduleStorageService.loadSchedules();
 
-    // Filter schedules for today
-    final todaySchedules = allSchedules.where((s) {
-      DateTime sDate;
-      if (s['date'] is DateTime) {
-        sDate = s['date'] as DateTime;
-      } else if (s['date'] is String) {
-        try {
-          sDate = DateTime.parse(s['date'] as String);
-        } catch (_) {
-          sDate = now;
-        }
-      } else {
-        sDate = now;
-      }
-      return sDate.year == now.year && sDate.month == now.month && sDate.day == now.day;
-    }).toList();
-
-    // Filter upcoming schedules where parsed schedule time is in the future relative to current time
-    final upcomingList = <Map<String, dynamic>>[];
-    for (var s in todaySchedules) {
-      final dt = _parseScheduleTime(s['date'], s['time'] as String?);
-      if (dt != null) {
-        // Allow a 5-min grace window so if user arrives right at schedule time it still shows
-        if (dt.isAfter(now.subtract(const Duration(minutes: 5)))) {
-          upcomingList.add({
-            'schedule': s,
-            'dateTime': dt,
-          });
+    Map<String, dynamic>? prioritySchedule;
+    if (widget.targetScheduleId != null && widget.targetScheduleId!.trim().isNotEmpty) {
+      final targetKey = widget.targetScheduleId!.trim();
+      for (final s in allSchedules) {
+        final id = s['id']?.toString() ?? '';
+        final title = s['title']?.toString() ?? '';
+        if (id == targetKey || title == targetKey || title.contains(targetKey) || targetKey.contains(title)) {
+          prioritySchedule = s;
+          break;
         }
       }
     }
 
-    if (upcomingList.isNotEmpty) {
-      // Sort upcoming schedules ascending by time (closest upcoming first!)
-      upcomingList.sort((a, b) => (a['dateTime'] as DateTime).compareTo(b['dateTime'] as DateTime));
-      _upcomingSchedule = upcomingList.first['schedule'] as Map<String, dynamic>;
+    if (prioritySchedule != null) {
+      _upcomingSchedule = prioritySchedule;
     } else {
-      // If no upcoming schedule left today, do not display schedule box
-      _upcomingSchedule = null;
+      // Priority 2 Fallback: Filter schedules for today & find closest upcoming
+      final todaySchedules = allSchedules.where((s) {
+        DateTime sDate;
+        if (s['date'] is DateTime) {
+          sDate = s['date'] as DateTime;
+        } else if (s['date'] is String) {
+          try {
+            sDate = DateTime.parse(s['date'] as String);
+          } catch (_) {
+            sDate = now;
+          }
+        } else {
+          sDate = now;
+        }
+        return sDate.year == now.year && sDate.month == now.month && sDate.day == now.day;
+      }).toList();
+
+      final upcomingList = <Map<String, dynamic>>[];
+      for (var s in todaySchedules) {
+        final dt = _parseScheduleTime(s['date'], s['time'] as String?);
+        if (dt != null) {
+          if (dt.isAfter(now.subtract(const Duration(minutes: 5)))) {
+            upcomingList.add({
+              'schedule': s,
+              'dateTime': dt,
+            });
+          }
+        }
+      }
+
+      if (upcomingList.isNotEmpty) {
+        upcomingList.sort((a, b) => (a['dateTime'] as DateTime).compareTo(b['dateTime'] as DateTime));
+        _upcomingSchedule = upcomingList.first['schedule'] as Map<String, dynamic>;
+      } else {
+        _upcomingSchedule = null;
+      }
     }
 
     if (mounted) {
