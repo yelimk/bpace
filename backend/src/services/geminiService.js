@@ -64,8 +64,8 @@ async function generateAiContent(promptText) {
         const errorText = await response.text();
         console.error(`[Gemini API (${model}) Http Error]:`, response.status, errorText);
         lastError = new Error(`Gemini API (${model}) HTTP Error: ${response.status}`);
-        if (response.status === 429) {
-          console.warn('[GeminiService] Rate limit 429 hit. Aborting fallback loop immediately to preserve quota.');
+        if (response.status === 429 || errorText.includes('RESOURCE_EXHAUSTED')) {
+          console.warn('[GeminiService] Rate limit 429 / RESOURCE_EXHAUSTED hit. Aborting fallback loop immediately to preserve quota.');
           break;
         }
         continue;
@@ -86,6 +86,10 @@ async function generateAiContent(promptText) {
       return jsonResult;
     } catch (err) {
       lastError = err;
+      if (err.message && (err.message.includes('429') || err.message.includes('RESOURCE_EXHAUSTED'))) {
+        console.warn('[GeminiService] Rate limit hit in catch block. Aborting fallback loop immediately.');
+        break;
+      }
     }
   }
 
