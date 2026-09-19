@@ -64,6 +64,10 @@ async function generateAiContent(promptText) {
         const errorText = await response.text();
         console.error(`[Gemini API (${model}) Http Error]:`, response.status, errorText);
         lastError = new Error(`Gemini API (${model}) HTTP Error: ${response.status}`);
+        if (response.status === 429) {
+          console.warn('[GeminiService] Rate limit 429 hit. Aborting fallback loop immediately to preserve quota.');
+          break;
+        }
         continue;
       }
 

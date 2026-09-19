@@ -277,8 +277,10 @@ class _BreathingExerciseScreenState extends State<BreathingExerciseScreen>
     _overlayTimer?.cancel();
     _cycleStopwatch.stop();
     _animController.stop();
-    _audioPlayer?.stop();
-    _audioPlayer?.dispose();
+    try {
+      _audioPlayer?.stop();
+      _audioPlayer?.dispose();
+    } catch (_) {}
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => BreathingCompletionScreen(

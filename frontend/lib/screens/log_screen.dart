@@ -121,6 +121,7 @@ class _LogScreenState extends State<LogScreen> {
 
   WeeklyReport? _aiReport;
   bool _isLoadingAiReport = false;
+  bool _hasAttemptedAiReport = false;
 
   @override
   void initState() {
@@ -131,11 +132,15 @@ class _LogScreenState extends State<LogScreen> {
     _currentDisplayMonth = DateTime(now.year, now.month, 1);
     _loadSchedules();
     _loadConditionScores();
-    _fetchAiReport();
+    if (_selectedSubTab == 2) {
+      _fetchAiReport();
+    }
   }
 
   Future<void> _fetchAiReport({bool force = false}) async {
     if (_isLoadingAiReport) return;
+    if (!force && _hasAttemptedAiReport) return;
+    _hasAttemptedAiReport = true;
 
     final prefs = await SharedPreferences.getInstance();
     
@@ -573,6 +578,9 @@ class _LogScreenState extends State<LogScreen> {
               setState(() {
                 _selectedSubTab = index;
               });
+              if (index == 2) {
+                _fetchAiReport();
+              }
             },
             borderRadius: BorderRadius.circular(24),
             child: AnimatedContainer(
