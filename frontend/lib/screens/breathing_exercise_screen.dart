@@ -26,6 +26,7 @@ class BreathingExerciseScreen extends StatefulWidget {
   final double? targetHold2Sec;
   final bool isAdaptiveRamp;
   final String? targetScheduleId;
+  final bool isAlreadySaved;
   final String? fromSource;
 
   const BreathingExerciseScreen({
@@ -44,6 +45,7 @@ class BreathingExerciseScreen extends StatefulWidget {
     this.targetHold2Sec,
     this.isAdaptiveRamp = false,
     this.targetScheduleId,
+    this.isAlreadySaved = false,
     this.fromSource,
   });
 
@@ -290,6 +292,7 @@ class _BreathingExerciseScreenState extends State<BreathingExerciseScreen>
           cycleCount: currentCycle,
           hrvChange: '$averageHrvBpmChange bpm',
           targetScheduleId: widget.targetScheduleId,
+          isAlreadySaved: widget.isAlreadySaved,
           isAdaptiveRamp: widget.isAdaptiveRamp,
           fromSource: widget.fromSource,
         ),

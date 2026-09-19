@@ -643,6 +643,7 @@ class _RitualHistoryScreenState extends State<RitualHistoryScreen> {
           isAdaptiveRamp: item.isAdaptiveRamp,
           initialInhaleSec: item.isAdaptiveRamp ? 2.8 : null,
           initialExhaleSec: item.isAdaptiveRamp ? 3.4 : null,
+          isAlreadySaved: true,
           fromSource: 'breath',
         ),
       ),
